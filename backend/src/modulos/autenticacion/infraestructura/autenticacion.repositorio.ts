@@ -49,6 +49,14 @@ export async function buscarPorId(idUsuario: number): Promise<UsuarioSesion | un
   return fila ? aSesion(fila) : undefined;
 }
 
+export async function asegurarUsuario(correo: string, hashContrasena: string, rol: string): Promise<void> {
+  await ejecutarProcedimiento('SP_Autenticacion_AsegurarUsuario', [
+    { nombre: 'Correo', tipo: sql.NVarChar(160), valor: correo },
+    { nombre: 'HashContrasena', tipo: sql.NVarChar(80), valor: hashContrasena },
+    { nombre: 'Rol', tipo: sql.NVarChar(40), valor: rol },
+  ]);
+}
+
 export async function registrar(correo: string, hashContrasena: string): Promise<UsuarioSesion> {
   const resultado = await ejecutarProcedimiento<FilaUsuario>('SP_Autenticacion_Registrar', [
     { nombre: 'Correo', tipo: sql.NVarChar(160), valor: correo },

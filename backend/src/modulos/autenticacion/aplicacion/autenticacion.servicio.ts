@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
-import { leerEntorno } from '../../../configuracion/entorno.js';
+import { leerEntorno, usuariosIniciales } from '../../../configuracion/entorno.js';
 import { ErrorAplicacion } from '../../../compartido/errores/error-aplicacion.js';
 import { traducirErrorSql } from '../../../compartido/errores/traducir-error-sql.js';
 import { conCandado } from '../../../compartido/concurrencia/candado.js';
@@ -9,6 +9,7 @@ import { iguales, hashToken } from '../dominio/comparar.js';
 import { esperaAleatoria } from '../dominio/espera.js';
 import type { UsuarioSesion } from '../dominio/usuario.js';
 import {
+  asegurarUsuario,
   buscarPorCorreo,
   buscarPorId,
   desactivarUsuario,
@@ -119,6 +120,14 @@ async function emitirPar(usuario: UsuarioSesion) {
   const expiraEn = new Date(Date.now() + leerEntorno().JWT_REFRESCO_SEGUNDOS * 1000);
   await guardarSesion(idSesion, usuario.idUsuario, hashToken(refresco), expiraEn);
   return { acceso, refresco };
+}
+
+export async function asegurarUsuariosIniciales(): Promise<void> {
+  const costo = leerEntorno().BCRYPT_COSTO;
+  for (const usuario of usuariosIniciales()) {
+    const hash = await bcrypt.hash(usuario.contrasena, costo);
+    await asegurarUsuario(usuario.correo, hash, usuario.rol);
+  }
 }
 
 function obtenerHashFicticio(): Promise<string> {

@@ -46,17 +46,6 @@ INSERT INTO Rol (Nombre)
 VALUES (N'Cliente'), (N'Operador'), (N'Administrador');
 GO
 
--- Hashes bcrypt de costo 12. La contraseña en claro queda para el README.
-INSERT INTO Usuario (IDRol, Correo, HashContrasena)
-SELECT r.IDRol, v.Correo, v.HashContrasena
-FROM (VALUES
-  (N'Administrador', N'admin@shopcart.demo', N'$2b$12$tpwqm9og4Rr7jNwwqY/pIexicbaLnlZr6nuAnIvn3/UoOiZv5YmVW'),
-  (N'Operador', N'operador@shopcart.demo', N'$2b$12$Utxh3BMVQel23q3/BELW3.2cJ3BwulBKJBT4GtzrnqQIKxEGTkuPS'),
-  (N'Cliente', N'cliente@shopcart.demo', N'$2b$12$wntja7rDnct09eKyUNg01OxrP9c.jiBkLp2Naa4gQdf1mAs.K/NJS')
-) AS v (Rol, Correo, HashContrasena)
-JOIN Rol r ON r.Nombre = v.Rol;
-GO
-
 CREATE OR ALTER PROCEDURE SP_Autenticacion_Registrar
   @Correo NVARCHAR(160),
   @HashContrasena NVARCHAR(80)
@@ -234,6 +223,26 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE SP_Autenticacion_AsegurarUsuario
+  @Correo NVARCHAR(160),
+  @HashContrasena NVARCHAR(80),
+  @Rol NVARCHAR(40)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF EXISTS (SELECT 1 FROM Usuario WHERE Correo = @Correo)
+    RETURN;
+
+  DECLARE @IDRol INT = (SELECT IDRol FROM Rol WHERE Nombre = @Rol);
+  IF @IDRol IS NULL
+    THROW 50400, 'ROL_INVALIDO|El rol no existe.', 1;
+
+  INSERT INTO Usuario (IDRol, Correo, HashContrasena)
+  VALUES (@IDRol, @Correo, @HashContrasena);
+END
+GO
+
+GRANT EXECUTE ON SP_Autenticacion_AsegurarUsuario TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_Registrar TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_BuscarPorCorreo TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_BuscarPorId TO shopcart_app;
