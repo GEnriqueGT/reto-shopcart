@@ -83,8 +83,8 @@ export function listar(pagina: number, tamano: number) {
   return listarUsuarios(pagina, tamano);
 }
 
-export function desactivar(idActor: number, idUsuario: number) {
-  return desactivarUsuario(idActor, idUsuario);
+export function desactivar(idUsuario: number) {
+  return desactivarUsuario(idUsuario);
 }
 
 async function rotar(usuario: UsuarioSesion, idSesion: string, tokenPresentado: string) {

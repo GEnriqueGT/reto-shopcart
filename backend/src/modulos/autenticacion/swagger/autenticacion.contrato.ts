@@ -1,11 +1,7 @@
 import { z } from 'zod';
 import { registro } from '../../../compartido/contrato/registro.js';
-import {
-  esquemaIdUsuario,
-  esquemaPagina,
-  esquemaRefresco,
-  esquemaRegistro,
-} from '../presentacion/autenticacion.esquema.js';
+import { dtoIdUsuario, dtoPagina } from '../../../compartido/dto/comun.dto.js';
+import { dtoRefresco, dtoRegistro } from '../presentacion/autenticacion.dto.js';
 
 const error = z
   .object({
@@ -38,10 +34,10 @@ const paginaUsuarios = z
   })
   .openapi('PaginaUsuarios');
 
-const cuerpoRegistro = esquemaRegistro.openapi('Registro');
-const cuerpoRefresco = esquemaRefresco.openapi('Refresco');
-const consultaUsuarios = esquemaPagina.openapi('ConsultaUsuarios');
-const parametroUsuario = esquemaIdUsuario.openapi('ParametroUsuario');
+const cuerpoRegistro = dtoRegistro.openapi('Registro');
+const cuerpoRefresco = dtoRefresco.openapi('Refresco');
+const consultaUsuarios = dtoPagina.openapi('ConsultaUsuarios');
+const parametroUsuario = dtoIdUsuario.openapi('ParametroUsuario');
 
 const acceso = [{ acceso: [] }];
 

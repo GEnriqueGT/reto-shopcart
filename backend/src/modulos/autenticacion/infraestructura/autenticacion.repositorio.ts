@@ -119,9 +119,8 @@ export async function listarUsuarios(pagina: number, tamano: number): Promise<{ 
   return { usuarios, total };
 }
 
-export async function desactivarUsuario(idActor: number, idUsuario: number): Promise<void> {
+export async function desactivarUsuario(idUsuario: number): Promise<void> {
   await ejecutarProcedimiento('SP_Autenticacion_DesactivarUsuario', [
-    { nombre: 'IDActor', tipo: sql.Int(), valor: idActor },
     { nombre: 'IDUsuario', tipo: sql.Int(), valor: idUsuario },
   ]);
 }

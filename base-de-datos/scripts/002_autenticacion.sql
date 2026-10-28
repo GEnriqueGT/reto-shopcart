@@ -204,20 +204,11 @@ END
 GO
 
 CREATE OR ALTER PROCEDURE SP_Autenticacion_DesactivarUsuario
-  @IDActor INT,
   @IDUsuario INT
 AS
 BEGIN
   SET NOCOUNT ON;
   SET XACT_ABORT ON;
-  IF NOT EXISTS (
-    SELECT 1
-    FROM Usuario u
-    JOIN Rol r ON r.IDRol = u.IDRol
-    WHERE u.IDUsuario = @IDActor AND r.Nombre = N'Administrador' AND u.Activo = 1
-  )
-    THROW 50403, 'ROL_INSUFICIENTE|Solo un administrador puede desactivar cuentas.', 1;
-
   IF NOT EXISTS (SELECT 1 FROM Usuario WHERE IDUsuario = @IDUsuario)
     THROW 50404, 'USUARIO_NO_ENCONTRADO|El usuario no existe.', 1;
 
