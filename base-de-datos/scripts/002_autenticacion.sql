@@ -66,7 +66,7 @@ BEGIN
   INSERT INTO Usuario (IDRol, Correo, HashContrasena)
   VALUES (@IDRol, @Correo, @HashContrasena);
 
-  SELECT u.IDUsuario, u.Correo, r.Nombre AS Rol, u.Activo
+  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo
   FROM Usuario u
   JOIN Rol r ON r.IDRol = u.IDRol
   WHERE u.IDUsuario = SCOPE_IDENTITY();
@@ -192,7 +192,7 @@ CREATE OR ALTER PROCEDURE SP_Autenticacion_ListarUsuarios
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT u.IDUsuario, u.Correo, r.Nombre AS Rol, u.Activo,
+  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo,
          CONVERT(VARCHAR(33), u.CreadoEn, 126) AS CreadoEn
   FROM Usuario u
   JOIN Rol r ON r.IDRol = u.IDRol

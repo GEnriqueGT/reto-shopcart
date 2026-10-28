@@ -1,6 +1,6 @@
 import sql from 'mssql';
 import { ejecutarProcedimiento, filas } from '../../../compartido/base-de-datos/ejecutor-procedimientos.js';
-import type { UsuarioSesion } from '../dominio/usuario.js';
+import { esquemaUsuario, type UsuarioSesion } from '../dominio/usuario.js';
 
 type FilaUsuario = {
   IDUsuario: number;
@@ -21,13 +21,13 @@ export type ResultadoRotacion = {
 };
 
 function aSesion(fila: FilaUsuario): UsuarioSesion {
-  return {
+  return esquemaUsuario.parse({
     idUsuario: fila.IDUsuario,
     idRol: fila.IDRol,
     correo: fila.Correo,
     rol: fila.Rol,
-    activo: fila.Activo === true || fila.Activo === 1,
-  };
+    activo: fila.Activo,
+  });
 }
 
 export async function buscarPorCorreo(correo: string): Promise<UsuarioConHash | undefined> {
