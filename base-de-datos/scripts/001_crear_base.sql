@@ -9,7 +9,7 @@ GO
 
 IF SUSER_ID(N'shopcart_app') IS NULL
 BEGIN
-  CREATE LOGIN shopcart_app WITH PASSWORD = N'$(ContrasenaApp)', CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF;
+  CREATE LOGIN shopcart_app WITH PASSWORD = N'$(ContrasenaApp)', CHECK_POLICY = ON;
 END
 GO
 
