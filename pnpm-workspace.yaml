@@ -1,0 +1,19 @@
+packages:
+  - backend
+
+shamefullyHoist: true
+
+allowBuilds:
+  "@scarf/scarf": false
+  bcrypt: false
+  esbuild: false
+  msgpackr-extract: false
+
+overrides:
+  "@azure/msal-node": 7.1.1
+  "@azure/msal-common": 16.14.3
+
+ignoredBuiltDependencies:
+  - "@scarf/scarf"
+  - esbuild
+  - msgpackr-extract

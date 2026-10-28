@@ -1,0 +1,8 @@
+{
+  "name": "ShopCart local",
+  "values": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "enabled": true },
+    { "key": "accessToken", "value": "", "enabled": true },
+    { "key": "correo", "value": "", "enabled": true }
+  ]
+}
