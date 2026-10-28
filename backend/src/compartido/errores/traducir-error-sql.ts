@@ -8,6 +8,7 @@ type ErrorSql = {
 
 const estados: Record<number, number> = {
   50400: 400,
+  50401: 401,
   50403: 403,
   50404: 404,
   50409: 409,
