@@ -15,6 +15,113 @@
           }
         }
       ]
+    },
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Registrar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"contrasena\": \"{{contrasena}}\"\n}"
+            },
+            "url": "{{baseUrl}}/autenticacion/registro"
+          }
+        },
+        {
+          "name": "Entrar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.acceso) pm.environment.set('accessToken', cuerpo.acceso);",
+                  "if (cuerpo.refresco) pm.environment.set('refresco', cuerpo.refresco);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"contrasena\": \"{{contrasena}}\"\n}"
+            },
+            "url": "{{baseUrl}}/autenticacion/entrar"
+          }
+        },
+        {
+          "name": "Refrescar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.acceso) pm.environment.set('accessToken', cuerpo.acceso);",
+                  "if (cuerpo.refresco) pm.environment.set('refresco', cuerpo.refresco);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresco\": \"{{refresco}}\"\n}"
+            },
+            "url": "{{baseUrl}}/autenticacion/refrescar"
+          }
+        },
+        {
+          "name": "Yo",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/autenticacion/yo"
+          }
+        },
+        {
+          "name": "Yo con token vencido",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenVencido}}" }],
+            "url": "{{baseUrl}}/autenticacion/yo"
+          }
+        },
+        {
+          "name": "Salir",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/autenticacion/salir"
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/autenticacion/usuarios?pagina=1&tamano=20"
+          }
+        },
+        {
+          "name": "Desactivar usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/autenticacion/usuarios/{{idUsuario}}/desactivar"
+          }
+        }
+      ]
     }
   ]
 }

@@ -3,12 +3,13 @@ import { exigirRol } from '../../../compartido/http/exigir-rol.js';
 import { fijarDueno } from '../../../compartido/http/fijar-dueno.js';
 import { limitar } from '../../../compartido/http/limitar.js';
 import { sesion } from '../../../compartido/http/sesion.js';
+import '../swagger/autenticacion.contrato.js';
 import * as controlador from './autenticacion.controlador.js';
 
 export function rutasAutenticacion(): Router {
   const router = Router();
   router.use('/autenticacion', (_req: Request, res: Response, next: NextFunction) => {
-    res.setHeader('Cache-Control', 'no-store');
+    res.header('Cache-Control', 'no-store');
     next();
   });
   router.post('/autenticacion/registro', sesion({ publica: true }), limitar('registro'), controlador.registrar);

@@ -3,6 +3,10 @@
   "values": [
     { "key": "baseUrl", "value": "http://localhost:3000", "enabled": true },
     { "key": "accessToken", "value": "", "enabled": true },
-    { "key": "correo", "value": "", "enabled": true }
+    { "key": "refresco", "value": "", "enabled": true },
+    { "key": "tokenVencido", "value": "", "enabled": true },
+    { "key": "correo", "value": "", "enabled": true },
+    { "key": "contrasena", "value": "", "enabled": true },
+    { "key": "idUsuario", "value": "", "enabled": true }
   ]
 }
