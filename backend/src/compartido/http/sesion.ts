@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ErrorAplicacion } from '../errores/error-aplicacion.js';
+import { esquemaUsuario } from '../../modulos/autenticacion/dominio/usuario.js';
 import { buscarPorId } from '../../modulos/autenticacion/infraestructura/autenticacion.repositorio.js';
 import { accesoDenegado } from '../../modulos/autenticacion/infraestructura/intentos-redis.js';
 import { verificarAcceso } from '../../modulos/autenticacion/infraestructura/tokens.js';
@@ -26,8 +27,9 @@ export function sesion(opciones?: { publica: true }) {
         next(new ErrorAplicacion(401, 'SESION_CERRADA', 'La sesión ya no es válida.'));
         return;
       }
-      const usuario = await buscarPorId(carga.sub);
-      if (!usuario?.activo) {
+      const fila = await buscarPorId(carga.sub);
+      const usuario = fila ? esquemaUsuario.parse(fila) : undefined;
+      if (!usuario?.Activo) {
         if (publica) {
           next();
           return;

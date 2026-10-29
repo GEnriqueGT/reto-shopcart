@@ -14,3 +14,7 @@ export const dtoRefresco = z
     refresco: z.string().min(20).max(1200),
   })
   .strict();
+
+export type Registro = z.infer<typeof dtoRegistro>;
+export type Entrada = z.infer<typeof dtoEntrada>;
+export type Refresco = z.infer<typeof dtoRefresco>;

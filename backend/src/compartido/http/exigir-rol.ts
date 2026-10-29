@@ -7,7 +7,7 @@ export function exigirRol(...roles: string[]) {
       next(new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.'));
       return;
     }
-    if (!roles.includes(req.usuario.rol)) {
+    if (!roles.includes(req.usuario.Rol)) {
       next(new ErrorAplicacion(403, 'ROL_INSUFICIENTE', 'No tienes permiso para esta operación.'));
       return;
     }

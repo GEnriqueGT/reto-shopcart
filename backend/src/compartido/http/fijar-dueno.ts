@@ -7,7 +7,7 @@ export function fijarDueno() {
       next(new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.'));
       return;
     }
-    req.dueno = { tipo: 'usuario', idUsuario: req.usuario.idUsuario };
+    req.dueno = { tipo: 'usuario', IDUsuario: req.usuario.IDUsuario };
     next();
   };
 }

@@ -10,7 +10,7 @@ export function limitar(nombre: string) {
     const ventana = leerEntorno().VENTANA_INTENTOS_SEGUNDOS;
     const claves = [`limite:${nombre}:ip:${req.ip ?? 'desconocida'}`];
     if (req.usuario) {
-      claves.push(`limite:${nombre}:usuario:${req.usuario.idUsuario}`);
+      claves.push(`limite:${nombre}:usuario:${req.usuario.IDUsuario}`);
     }
     try {
       for (const clave of claves) {

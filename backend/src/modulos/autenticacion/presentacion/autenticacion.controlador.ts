@@ -8,19 +8,19 @@ import { dtoEntrada, dtoRefresco, dtoRegistro } from './autenticacion.dto.js';
 
 export const registrar = envolver(async (req: Request, res: Response) => {
   const datos = dtoRegistro.parse(req.body);
-  const usuario = await servicio.registrar(datos.correo, datos.contrasena, req.ip ?? 'desconocida');
+  const usuario = await servicio.registrar(datos, req.ip ?? 'desconocida');
   res.status(201).json(usuario);
 });
 
 export const entrar = envolver(async (req: Request, res: Response) => {
   const datos = dtoEntrada.parse(req.body);
-  const par = await servicio.entrar(datos.correo, datos.contrasena, req.ip ?? 'desconocida');
+  const par = await servicio.entrar(datos, req.ip ?? 'desconocida');
   res.status(200).json(par);
 });
 
 export const refrescar = envolver(async (req: Request, res: Response) => {
   const datos = dtoRefresco.parse(req.body);
-  const par = await servicio.refrescar(datos.refresco, req.ip ?? 'desconocida');
+  const par = await servicio.refrescar(datos, req.ip ?? 'desconocida');
   res.status(200).json(par);
 });
 
@@ -28,12 +28,12 @@ export const salir = envolver(async (req: Request, res: Response) => {
   if (!req.usuario || !req.acceso) {
     throw new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.');
   }
-  await servicio.salir(req.usuario.idUsuario, req.acceso.sid, req.acceso.jti, req.acceso.exp);
+  await servicio.salir(req.usuario.IDUsuario, req.acceso.sid, req.acceso.jti, req.acceso.exp);
   res.status(204).send();
 });
 
 export const yo = envolver(async (req: Request, res: Response) => {
-  if (!req.usuario || req.dueno?.idUsuario !== req.usuario.idUsuario) {
+  if (!req.usuario || req.dueno?.IDUsuario !== req.usuario.IDUsuario) {
     throw new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.');
   }
   res.status(200).json(req.usuario);
@@ -41,7 +41,7 @@ export const yo = envolver(async (req: Request, res: Response) => {
 
 export const listar = envolver(async (req: Request, res: Response) => {
   const consulta = dtoPagina.parse(req.query);
-  const pagina = await servicio.listar(consulta.pagina, consulta.tamano);
+  const pagina = await servicio.listar(consulta);
   res.status(200).json(pagina);
 });
 

@@ -78,7 +78,7 @@ CREATE OR ALTER PROCEDURE SP_Autenticacion_BuscarPorCorreo
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT u.IDUsuario, u.Correo, u.HashContrasena, u.Activo, u.IDRol, r.Nombre AS Rol
+  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo, u.HashContrasena
   FROM Usuario u
   JOIN Rol r ON r.IDRol = u.IDRol
   WHERE u.Correo = @Correo;
@@ -90,7 +90,7 @@ CREATE OR ALTER PROCEDURE SP_Autenticacion_BuscarPorId
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT u.IDUsuario, u.Correo, u.Activo, u.IDRol, r.Nombre AS Rol
+  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo
   FROM Usuario u
   JOIN Rol r ON r.IDRol = u.IDRol
   WHERE u.IDUsuario = @IDUsuario;
@@ -192,8 +192,7 @@ CREATE OR ALTER PROCEDURE SP_Autenticacion_ListarUsuarios
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo,
-         CONVERT(VARCHAR(33), u.CreadoEn, 126) AS CreadoEn
+  SELECT u.IDUsuario, u.IDRol, u.Correo, r.Nombre AS Rol, u.Activo
   FROM Usuario u
   JOIN Rol r ON r.IDRol = u.IDRol
   ORDER BY u.IDUsuario

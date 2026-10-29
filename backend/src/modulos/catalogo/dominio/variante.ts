@@ -3,12 +3,12 @@ import { bit, dinero } from '../../../compartido/base-de-datos/valores.js';
 
 export const esquemaVariante = z
   .object({
-    idVariante: z.number().int().positive(),
-    idProducto: z.number().int().positive(),
-    sku: z.string().min(1).max(40),
-    precio: dinero,
-    existencia: z.number().int().nonnegative(),
-    activo: bit,
+    IDVariante: z.number().int().positive(),
+    IDProducto: z.number().int().positive(),
+    Sku: z.string().min(1).max(40),
+    Precio: dinero,
+    Existencia: z.number().int().nonnegative(),
+    Activo: bit,
   })
   .strict();
 
@@ -16,10 +16,10 @@ export type Variante = z.output<typeof esquemaVariante>;
 
 export const esquemaAtributoVariante = z
   .object({
-    idAtributoVariante: z.number().int().positive(),
-    idVariante: z.number().int().positive(),
-    nombre: z.string().min(1).max(40),
-    valor: z.string().min(1).max(80),
+    IDAtributoVariante: z.number().int().positive(),
+    IDVariante: z.number().int().positive(),
+    Nombre: z.string().min(1).max(40),
+    Valor: z.string().min(1).max(80),
   })
   .strict();
 

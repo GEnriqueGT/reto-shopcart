@@ -1,17 +1,5 @@
 import sql from 'mssql';
 import { ejecutarProcedimiento, filas } from '../../../compartido/base-de-datos/ejecutor-procedimientos.js';
-import { esquemaUsuario, type UsuarioSesion } from '../dominio/usuario.js';
-
-type FilaUsuario = {
-  IDUsuario: number;
-  IDRol: number;
-  Correo: string;
-  Rol: string;
-  Activo: boolean | number;
-  HashContrasena?: string;
-};
-
-export type UsuarioConHash = UsuarioSesion & { hashContrasena: string };
 
 export type ResultadoRotacion = {
   Resultado: string;
@@ -20,33 +8,22 @@ export type ResultadoRotacion = {
   Refresco: string;
 };
 
-function aSesion(fila: FilaUsuario): UsuarioSesion {
-  return esquemaUsuario.parse({
-    idUsuario: fila.IDUsuario,
-    idRol: fila.IDRol,
-    correo: fila.Correo,
-    rol: fila.Rol,
-    activo: fila.Activo,
-  });
+function grupos(resultado: sql.IResult<unknown>): unknown[][] {
+  return (resultado.recordsets ?? []) as unknown[][];
 }
 
-export async function buscarPorCorreo(correo: string): Promise<UsuarioConHash | undefined> {
-  const resultado = await ejecutarProcedimiento<FilaUsuario>('SP_Autenticacion_BuscarPorCorreo', [
+export async function buscarPorCorreo(correo: string): Promise<unknown> {
+  const resultado = await ejecutarProcedimiento('SP_Autenticacion_BuscarPorCorreo', [
     { nombre: 'Correo', tipo: sql.NVarChar(160), valor: correo },
   ]);
-  const fila = filas(resultado)[0];
-  if (!fila?.HashContrasena) {
-    return undefined;
-  }
-  return { ...aSesion(fila), hashContrasena: fila.HashContrasena };
+  return filas(resultado)[0];
 }
 
-export async function buscarPorId(idUsuario: number): Promise<UsuarioSesion | undefined> {
-  const resultado = await ejecutarProcedimiento<FilaUsuario>('SP_Autenticacion_BuscarPorId', [
+export async function buscarPorId(idUsuario: number): Promise<unknown> {
+  const resultado = await ejecutarProcedimiento('SP_Autenticacion_BuscarPorId', [
     { nombre: 'IDUsuario', tipo: sql.Int(), valor: idUsuario },
   ]);
-  const fila = filas(resultado)[0];
-  return fila ? aSesion(fila) : undefined;
+  return filas(resultado)[0];
 }
 
 export async function asegurarUsuario(correo: string, hashContrasena: string, rol: string): Promise<void> {
@@ -57,16 +34,12 @@ export async function asegurarUsuario(correo: string, hashContrasena: string, ro
   ]);
 }
 
-export async function registrar(correo: string, hashContrasena: string): Promise<UsuarioSesion> {
-  const resultado = await ejecutarProcedimiento<FilaUsuario>('SP_Autenticacion_Registrar', [
+export async function registrar(correo: string, hashContrasena: string): Promise<unknown> {
+  const resultado = await ejecutarProcedimiento('SP_Autenticacion_Registrar', [
     { nombre: 'Correo', tipo: sql.NVarChar(160), valor: correo },
     { nombre: 'HashContrasena', tipo: sql.NVarChar(80), valor: hashContrasena },
   ]);
-  const fila = filas(resultado)[0];
-  if (!fila) {
-    throw new Error('El registro no devolvió el usuario.');
-  }
-  return aSesion(fila);
+  return filas(resultado)[0];
 }
 
 export async function guardarSesion(idSesion: string, idUsuario: number, hashRefresco: string, expiraEn: Date): Promise<void> {
@@ -108,15 +81,12 @@ export async function revocarSesion(idUsuario: number, idSesion: string): Promis
   ]);
 }
 
-export async function listarUsuarios(pagina: number, tamano: number): Promise<{ usuarios: UsuarioSesion[]; total: number }> {
-  const resultado = await ejecutarProcedimiento<FilaUsuario>('SP_Autenticacion_ListarUsuarios', [
+export async function listarUsuarios(pagina: number, tamano: number): Promise<unknown[][]> {
+  const resultado = await ejecutarProcedimiento('SP_Autenticacion_ListarUsuarios', [
     { nombre: 'Pagina', tipo: sql.Int(), valor: pagina },
     { nombre: 'Tamano', tipo: sql.Int(), valor: tamano },
   ]);
-  const grupos = resultado.recordsets as unknown as [FilaUsuario[], { Total: number }[]];
-  const usuarios = (grupos[0] ?? []).map(aSesion);
-  const total = grupos[1]?.[0]?.Total ?? 0;
-  return { usuarios, total };
+  return grupos(resultado);
 }
 
 export async function desactivarUsuario(idUsuario: number): Promise<void> {

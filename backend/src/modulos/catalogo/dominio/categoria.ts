@@ -3,9 +3,9 @@ import { bit } from '../../../compartido/base-de-datos/valores.js';
 
 export const esquemaCategoria = z
   .object({
-    idCategoria: z.number().int().positive(),
-    nombre: z.string().min(1).max(80),
-    activo: bit,
+    IDCategoria: z.number().int().positive(),
+    Nombre: z.string().min(1).max(80),
+    Activo: bit,
   })
   .strict();
 

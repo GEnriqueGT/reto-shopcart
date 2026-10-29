@@ -12,3 +12,5 @@ export const dtoIdUsuario = z
     idUsuario: z.coerce.number().int().positive(),
   })
   .strict();
+
+export type Pagina = z.output<typeof dtoPagina>;

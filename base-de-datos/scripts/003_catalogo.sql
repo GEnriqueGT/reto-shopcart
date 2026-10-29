@@ -81,7 +81,7 @@ CREATE OR ALTER PROCEDURE SP_Catalogo_ListarCategoriasActivas
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT IDCategoria, Nombre
+  SELECT IDCategoria, Nombre, Activo
   FROM Categoria
   WHERE Activo = 1
   ORDER BY Nombre;
@@ -332,6 +332,40 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE SP_Catalogo_LeerPublico
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  SELECT IDCategoria, Nombre, Activo
+  FROM Categoria
+  WHERE Activo = 1
+  ORDER BY Nombre;
+
+  SELECT p.IDProducto, p.IDCategoria, c.Nombre AS Categoria, p.Nombre, p.Descripcion
+  FROM Producto p
+  JOIN Categoria c ON c.IDCategoria = p.IDCategoria AND c.Activo = 1
+  WHERE p.Activo = 1;
+
+  SELECT v.IDVariante, v.IDProducto, v.Sku, v.Precio, v.Existencia
+  FROM Variante v
+  JOIN Producto p ON p.IDProducto = v.IDProducto AND p.Activo = 1
+  JOIN Categoria c ON c.IDCategoria = p.IDCategoria AND c.Activo = 1
+  WHERE v.Activo = 1;
+
+  SELECT a.IDVariante, a.Nombre, a.Valor
+  FROM AtributoVariante a
+  JOIN Variante v ON v.IDVariante = a.IDVariante AND v.Activo = 1
+  JOIN Producto p ON p.IDProducto = v.IDProducto AND p.Activo = 1
+  JOIN Categoria c ON c.IDCategoria = p.IDCategoria AND c.Activo = 1;
+
+  SELECT i.IDImagenProducto, i.IDProducto, i.Url, i.Orden
+  FROM ImagenProducto i
+  JOIN Producto p ON p.IDProducto = i.IDProducto AND p.Activo = 1
+  JOIN Categoria c ON c.IDCategoria = p.IDCategoria AND c.Activo = 1;
+END
+GO
+
 CREATE OR ALTER PROCEDURE SP_Catalogo_Buscar
   @Texto NVARCHAR(80) = NULL,
   @IDCategoria INT = NULL,
@@ -435,7 +469,7 @@ BEGIN
   JOIN Categoria c ON c.IDCategoria = p.IDCategoria
   WHERE p.IDProducto = @IDProducto;
 
-  SELECT IDVariante, Sku, Precio, Existencia, Activo
+  SELECT IDVariante, IDProducto, Sku, Precio, Existencia, Activo
   FROM Variante
   WHERE IDProducto = @IDProducto
   ORDER BY Sku;
@@ -446,7 +480,7 @@ BEGIN
   WHERE v.IDProducto = @IDProducto
   ORDER BY a.IDVariante, a.Nombre;
 
-  SELECT IDImagenProducto, Url, Orden
+  SELECT IDImagenProducto, IDProducto, Url, Orden
   FROM ImagenProducto
   WHERE IDProducto = @IDProducto
   ORDER BY Orden, IDImagenProducto;
@@ -467,6 +501,7 @@ GRANT EXECUTE ON SP_Catalogo_DesactivarVariante TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_GuardarAtributo TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_AgregarImagen TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_QuitarImagen TO shopcart_app;
+GRANT EXECUTE ON SP_Catalogo_LeerPublico TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_Buscar TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_ConsultarProducto TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_ConsultarProductoMantenimiento TO shopcart_app;

@@ -12,11 +12,11 @@ const error = z
 
 const usuario = z
   .object({
-    idUsuario: z.number().int(),
-    idRol: z.number().int(),
-    correo: z.string(),
-    rol: z.string(),
-    activo: z.boolean(),
+    IDUsuario: z.number().int(),
+    IDRol: z.number().int(),
+    Correo: z.string(),
+    Rol: z.string(),
+    Activo: z.boolean(),
   })
   .openapi('Usuario');
 
