@@ -7,6 +7,10 @@
     { "key": "tokenVencido", "value": "", "enabled": true },
     { "key": "correo", "value": "", "enabled": true },
     { "key": "contrasena", "value": "", "enabled": true },
-    { "key": "idUsuario", "value": "", "enabled": true }
+    { "key": "idUsuario", "value": "", "enabled": true },
+    { "key": "idCategoria", "value": "", "enabled": true },
+    { "key": "idProducto", "value": "", "enabled": true },
+    { "key": "idVariante", "value": "", "enabled": true },
+    { "key": "idImagenProducto", "value": "", "enabled": true }
   ]
 }

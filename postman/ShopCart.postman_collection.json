@@ -122,6 +122,248 @@
           }
         }
       ]
+    },
+    {
+      "name": "Catálogo",
+      "item": [
+        {
+          "name": "Listar categorías activas",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalogo/categorias"
+          }
+        },
+        {
+          "name": "Buscar productos",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalogo/productos?pagina=1&tamano=20&orden=nombre"
+          }
+        },
+        {
+          "name": "Ver producto",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalogo/productos/{{idProducto}}"
+          }
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/mantenimiento/categorias"
+          }
+        },
+        {
+          "name": "Crear categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.IDCategoria) pm.environment.set('idCategoria', cuerpo.IDCategoria);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mesas\"\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/categorias"
+          }
+        },
+        {
+          "name": "Editar categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mesas de comedor\"\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/categorias/{{idCategoria}}"
+          }
+        },
+        {
+          "name": "Desactivar categoría",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/categorias/{{idCategoria}}/desactivar"
+          }
+        },
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.IDProducto) pm.environment.set('idProducto', cuerpo.IDProducto);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCategoria\": {{idCategoria}},\n  \"nombre\": \"Mesa de roble\",\n  \"descripcion\": \"Comedor\"\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/productos"
+          }
+        },
+        {
+          "name": "Ver producto en mantenimiento",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/mantenimiento/productos/{{idProducto}}"
+          }
+        },
+        {
+          "name": "Editar producto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCategoria\": {{idCategoria}},\n  \"nombre\": \"Mesa de roble\",\n  \"descripcion\": \"Seis puestos\"\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/productos/{{idProducto}}"
+          }
+        },
+        {
+          "name": "Crear variante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.IDVariante) pm.environment.set('idVariante', cuerpo.IDVariante);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"MESA-ROBLE\",\n  \"precio\": \"19.99\",\n  \"existencia\": 5\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/productos/{{idProducto}}/variantes"
+          }
+        },
+        {
+          "name": "Editar variante",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"MESA-ROBLE\",\n  \"precio\": \"24.50\",\n  \"existencia\": 4\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/variantes/{{idVariante}}"
+          }
+        },
+        {
+          "name": "Guardar atributo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Color\",\n  \"valor\": \"Roble\"\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/variantes/{{idVariante}}/atributos"
+          }
+        },
+        {
+          "name": "Agregar imagen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.IDImagenProducto) pm.environment.set('idImagenProducto', cuerpo.IDImagenProducto);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://ejemplo.local/mesa.jpg\",\n  \"orden\": 0\n}"
+            },
+            "url": "{{baseUrl}}/catalogo/productos/{{idProducto}}/imagenes"
+          }
+        },
+        {
+          "name": "Quitar imagen",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/imagenes/{{idImagenProducto}}"
+          }
+        },
+        {
+          "name": "Desactivar variante",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/variantes/{{idVariante}}/desactivar"
+          }
+        },
+        {
+          "name": "Desactivar producto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/productos/{{idProducto}}/desactivar"
+          }
+        }
+      ]
     }
   ]
 }

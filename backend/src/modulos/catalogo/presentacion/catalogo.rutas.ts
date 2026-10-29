@@ -2,6 +2,7 @@ import { Router, type NextFunction, type Request, type Response } from 'express'
 import { exigirRol } from '../../../compartido/http/exigir-rol.js';
 import { limitar } from '../../../compartido/http/limitar.js';
 import { sesion } from '../../../compartido/http/sesion.js';
+import '../swagger/catalogo.contrato.js';
 import * as controlador from './catalogo.controlador.js';
 
 export function rutasCatalogo(): Router {
