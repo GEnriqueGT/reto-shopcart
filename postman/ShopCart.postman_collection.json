@@ -364,6 +364,42 @@
           }
         }
       ]
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        {
+          "name": "Registrar movimiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idVariante\": {{idVariante}},\n  \"tipo\": \"Entrada\",\n  \"cantidad\": 5,\n  \"motivo\": \"Compra\"\n}"
+            },
+            "url": "{{baseUrl}}/inventario/movimientos"
+          }
+        },
+        {
+          "name": "Consultar kardex",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/inventario/variantes/{{idVariante}}/kardex?pagina=1&tamano=20"
+          }
+        },
+        {
+          "name": "Consultar existencia",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/inventario/variantes/{{idVariante}}/existencia"
+          }
+        }
+      ]
     }
   ]
 }

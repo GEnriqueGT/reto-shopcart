@@ -10,6 +10,7 @@ import './compartido/http/tipos-solicitud.js';
 import { rutasSalud } from './compartido/http/salud.js';
 import { rutasAutenticacion } from './modulos/autenticacion/presentacion/autenticacion.rutas.js';
 import { rutasCatalogo } from './modulos/catalogo/presentacion/catalogo.rutas.js';
+import { rutasInventario } from './modulos/inventario/presentacion/inventario.rutas.js';
 import { cerrarPool } from './compartido/base-de-datos/pool.js';
 import { cerrarRedis } from './compartido/redis/cliente-redis.js';
 
@@ -24,6 +25,7 @@ export function crearAplicacion() {
   app.use(rutasSalud());
   app.use(rutasAutenticacion());
   app.use(rutasCatalogo());
+  app.use(rutasInventario());
   app.get('/openapi.json', (_req: Request, res: Response) => {
     res.json(documentoOpenApi());
   });
