@@ -400,6 +400,84 @@
           }
         }
       ]
+    },
+    {
+      "name": "Cupones",
+      "item": [
+        {
+          "name": "Listar cupones",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/cupones?pagina=1&tamano=20"
+          }
+        },
+        {
+          "name": "Crear cupón",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.IDCupon) pm.environment.set('idCupon', cuerpo.IDCupon);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"BIENVENIDA\",\n  \"tipo\": \"Porcentaje\",\n  \"porcentaje\": \"10.00\",\n  \"monto\": null,\n  \"minimo\": \"50.00\",\n  \"limite\": 100,\n  \"limitePorCliente\": 1,\n  \"alcance\": \"Carrito\",\n  \"idCategoria\": null,\n  \"vigenteDesde\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenteHasta\": \"2026-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/cupones"
+          }
+        },
+        {
+          "name": "Editar cupón",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"BIENVENIDA\",\n  \"tipo\": \"Porcentaje\",\n  \"porcentaje\": \"15.00\",\n  \"monto\": null,\n  \"minimo\": \"50.00\",\n  \"limite\": 100,\n  \"limitePorCliente\": 1,\n  \"alcance\": \"Carrito\",\n  \"idCategoria\": null,\n  \"vigenteDesde\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenteHasta\": \"2026-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/cupones/{{idCupon}}"
+          }
+        },
+        {
+          "name": "Evaluar cupón",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"BIENVENIDA\",\n  \"monto\": \"80.00\"\n}"
+            },
+            "url": "{{baseUrl}}/cupones/evaluar"
+          }
+        },
+        {
+          "name": "Desactivar cupón",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/cupones/{{idCupon}}/desactivar"
+          }
+        }
+      ]
     }
   ]
 }
