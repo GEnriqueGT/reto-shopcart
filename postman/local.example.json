@@ -13,6 +13,9 @@
     { "key": "idVariante", "value": "", "enabled": true },
     { "key": "idImagenProducto", "value": "", "enabled": true },
     { "key": "idCupon", "value": "", "enabled": true },
-    { "key": "tokenCarrito", "value": "", "enabled": true }
+    { "key": "tokenCarrito", "value": "", "enabled": true },
+    { "key": "idDireccion", "value": "", "enabled": true },
+    { "key": "idPedido", "value": "", "enabled": true },
+    { "key": "llavePago", "value": "pago-demo-01", "enabled": true }
   ]
 }

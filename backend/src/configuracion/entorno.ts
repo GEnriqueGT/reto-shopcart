@@ -27,6 +27,7 @@ const esquema = z.object({
   USUARIO_CLIENTE_CORREO: correoInicial,
   USUARIO_CLIENTE_CONTRASENA: contrasenaInicial,
   CARRITO_ABANDONADO_MINUTOS: z.coerce.number().int().positive(),
+  RESERVA_MINUTOS: z.coerce.number().int().positive().max(1440),
 }).refine((entorno) => entorno.JWT_SECRETO_ACCESO !== entorno.JWT_SECRETO_REFRESCO, {
   message: 'Los secretos de acceso y refresco deben ser distintos.',
 }).refine((entorno) => {
