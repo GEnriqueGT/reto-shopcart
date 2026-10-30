@@ -6,7 +6,7 @@
     "dev": "tsx watch src/indice.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/indice.js",
-    "test": "tsx --test src/compartido/errores/traducir-error-sql.test.ts src/modulos/autenticacion/dominio/comparar.test.ts src/modulos/autenticacion/swagger/autenticacion.contrato.test.ts src/modulos/catalogo/presentacion/catalogo.dto.test.ts src/modulos/catalogo/swagger/catalogo.contrato.test.ts src/modulos/inventario/presentacion/inventario.dto.test.ts src/modulos/inventario/swagger/inventario.contrato.test.ts src/compartido/base-de-datos/leer.test.ts",
+    "test": "tsx --test src/compartido/errores/traducir-error-sql.test.ts src/modulos/autenticacion/dominio/comparar.test.ts src/modulos/autenticacion/swagger/autenticacion.contrato.test.ts src/modulos/catalogo/presentacion/catalogo.dto.test.ts src/modulos/catalogo/swagger/catalogo.contrato.test.ts src/modulos/inventario/presentacion/inventario.dto.test.ts src/modulos/inventario/swagger/inventario.contrato.test.ts src/modulos/cupones/presentacion/cupones.dto.test.ts src/compartido/base-de-datos/leer.test.ts",
     "lint": "eslint src",
     "format": "prettier --write ."
   },
