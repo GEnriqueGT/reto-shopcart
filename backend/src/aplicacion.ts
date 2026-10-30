@@ -12,6 +12,7 @@ import { rutasAutenticacion } from './modulos/autenticacion/presentacion/autenti
 import { rutasCatalogo } from './modulos/catalogo/presentacion/catalogo.rutas.js';
 import { rutasInventario } from './modulos/inventario/presentacion/inventario.rutas.js';
 import { rutasCupones } from './modulos/cupones/presentacion/cupones.rutas.js';
+import { rutasCarrito } from './modulos/carrito/presentacion/carrito.rutas.js';
 import { cerrarPool } from './compartido/base-de-datos/pool.js';
 import { cerrarRedis } from './compartido/redis/cliente-redis.js';
 
@@ -28,6 +29,7 @@ export function crearAplicacion() {
   app.use(rutasCatalogo());
   app.use(rutasInventario());
   app.use(rutasCupones());
+  app.use(rutasCarrito());
   app.get('/openapi.json', (_req: Request, res: Response) => {
     res.json(documentoOpenApi());
   });

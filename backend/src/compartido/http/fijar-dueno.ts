@@ -1,13 +1,19 @@
+import { randomBytes } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
-import { ErrorAplicacion } from '../errores/error-aplicacion.js';
+
+const ENCABEZADO = 'Carrito-Token';
 
 export function fijarDueno() {
-  return (req: Request, _res: Response, next: NextFunction): void => {
-    if (!req.usuario) {
-      next(new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.'));
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (req.usuario) {
+      req.dueno = { tipo: 'usuario', IDUsuario: req.usuario.IDUsuario };
+      next();
       return;
     }
-    req.dueno = { tipo: 'usuario', IDUsuario: req.usuario.IDUsuario };
+    const presentado = req.header(ENCABEZADO)?.trim() ?? '';
+    const token = presentado.length > 0 ? presentado : randomBytes(32).toString('hex');
+    req.dueno = { tipo: 'invitado', Token: token };
+    res.header(ENCABEZADO, token);
     next();
   };
 }

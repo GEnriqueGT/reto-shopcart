@@ -12,6 +12,7 @@
     { "key": "idProducto", "value": "", "enabled": true },
     { "key": "idVariante", "value": "", "enabled": true },
     { "key": "idImagenProducto", "value": "", "enabled": true },
-    { "key": "idCupon", "value": "", "enabled": true }
+    { "key": "idCupon", "value": "", "enabled": true },
+    { "key": "tokenCarrito", "value": "", "enabled": true }
   ]
 }

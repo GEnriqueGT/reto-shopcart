@@ -33,7 +33,7 @@ export const salir = envolver(async (req: Request, res: Response) => {
 });
 
 export const yo = envolver(async (req: Request, res: Response) => {
-  if (!req.usuario || req.dueno?.IDUsuario !== req.usuario.IDUsuario) {
+  if (!req.usuario || req.dueno?.tipo !== 'usuario' || req.dueno.IDUsuario !== req.usuario.IDUsuario) {
     throw new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.');
   }
   res.status(200).json(req.usuario);

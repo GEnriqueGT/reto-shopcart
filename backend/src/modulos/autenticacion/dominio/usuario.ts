@@ -19,7 +19,6 @@ export const esquemaUsuarioConHash = esquemaUsuario.extend({
 
 export type UsuarioConHash = z.output<typeof esquemaUsuarioConHash>;
 
-export type Dueno = {
-  tipo: 'usuario';
-  IDUsuario: number;
-};
+export type Dueno =
+  | { tipo: 'usuario'; IDUsuario: number }
+  | { tipo: 'invitado'; Token: string };
