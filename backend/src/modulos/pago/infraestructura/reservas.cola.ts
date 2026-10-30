@@ -37,6 +37,10 @@ export async function abrirReservas(): Promise<void> {
   }
 }
 
+export function obtenerCola(): Queue | undefined {
+  return cola;
+}
+
 export async function programarLiberacion(idPedido: number, minutos: number): Promise<void> {
   if (!cola) {
     return;

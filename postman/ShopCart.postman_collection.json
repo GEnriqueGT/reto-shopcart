@@ -696,6 +696,93 @@
           }
         }
       ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Listar mis pedidos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos"
+          }
+        },
+        {
+          "name": "Listar seguimiento",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos?estado=Pagado&idUsuario={{idUsuario}}"
+          }
+        },
+        {
+          "name": "Consultar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "if (cuerpo.detalles && cuerpo.detalles[0]) pm.environment.set('idDetallePedido', cuerpo.detalles[0].IDDetallePedido);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}"
+          }
+        },
+        {
+          "name": "Cancelar pedido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}/cancelar"
+          }
+        },
+        {
+          "name": "Pasar a preparación",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EnPreparacion\"\n}"
+            },
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}/transicionar"
+          }
+        },
+        {
+          "name": "Devolver una línea",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lineas\": [\n    { \"idDetallePedido\": {{idDetallePedido}}, \"cantidad\": 1 }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}/devoluciones"
+          }
+        },
+        {
+          "name": "Ver colas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos/colas"
+          }
+        }
+      ]
     }
   ]
 }

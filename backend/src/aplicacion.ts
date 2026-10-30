@@ -14,6 +14,7 @@ import { rutasInventario } from './modulos/inventario/presentacion/inventario.ru
 import { rutasCupones } from './modulos/cupones/presentacion/cupones.rutas.js';
 import { rutasCarrito } from './modulos/carrito/presentacion/carrito.rutas.js';
 import { rutasPago } from './modulos/pago/presentacion/pago.rutas.js';
+import { rutasPedidos } from './modulos/pedidos/presentacion/pedidos.rutas.js';
 import { cerrarPool } from './compartido/base-de-datos/pool.js';
 import { cerrarRedis } from './compartido/redis/cliente-redis.js';
 
@@ -32,6 +33,7 @@ export function crearAplicacion() {
   app.use(rutasCupones());
   app.use(rutasCarrito());
   app.use(rutasPago());
+  app.use(rutasPedidos());
   app.get('/openapi.json', (_req: Request, res: Response) => {
     res.json(documentoOpenApi());
   });
