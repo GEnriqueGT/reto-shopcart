@@ -7,6 +7,7 @@ import { enFila } from '../../../compartido/concurrencia/fila-local.js';
 import { centavos } from '../../carrito/dominio/centavos.js';
 import { consultar as consultarCarrito } from '../../carrito/aplicacion/carrito.servicio.js';
 import { invalidarCatalogo } from '../../catalogo/infraestructura/catalogo.cache.js';
+import { invalidarReportes } from '../../reportes/infraestructura/reportes.cache.js';
 import {
   esquemaConsultaPedido,
   esquemaDireccion,
@@ -103,6 +104,7 @@ export async function cobrar(idUsuario: number, datos: Cobrar): Promise<Consulta
   );
   if (consulta.pedido.Estado === 'Pagado') {
     await invalidarCatalogo();
+    await invalidarReportes();
   }
   return consulta;
 }

@@ -3,6 +3,7 @@ import { conCandado } from '../../../compartido/concurrencia/candado.js';
 import { enFila } from '../../../compartido/concurrencia/fila-local.js';
 import { centavos } from '../../carrito/dominio/centavos.js';
 import { invalidarCatalogo } from '../../catalogo/infraestructura/catalogo.cache.js';
+import { invalidarReportes } from '../../reportes/infraestructura/reportes.cache.js';
 import {
   esquemaConsultaGestion,
   esquemaPaginaPedidos,
@@ -67,8 +68,10 @@ export function consultar(idPedido: number, idActor: number, operativo: boolean)
   return repositorio.consultar(idPedido, operativo ? null : idActor).then(gestion);
 }
 
-export function transicionar(idPedido: number, idActor: number, datos: Transicionar): Promise<ConsultaGestion> {
-  return conPedido(idPedido, () => repositorio.transicionar(idPedido, idActor, datos).then(gestion));
+export async function transicionar(idPedido: number, idActor: number, datos: Transicionar): Promise<ConsultaGestion> {
+  const consulta = await conPedido(idPedido, () => repositorio.transicionar(idPedido, idActor, datos).then(gestion));
+  await invalidarReportes();
+  return consulta;
 }
 
 export async function cancelar(idPedido: number, idActor: number, operativo: boolean): Promise<ConsultaGestion> {
@@ -76,11 +79,13 @@ export async function cancelar(idPedido: number, idActor: number, operativo: boo
     repositorio.cancelar(idPedido, idActor, operativo ? null : idActor).then(gestion),
   );
   await invalidarCatalogo();
+  await invalidarReportes();
   return consulta;
 }
 
 export async function devolver(idPedido: number, idActor: number, datos: Devolver): Promise<ConsultaGestion> {
   const consulta = await conPedido(idPedido, () => repositorio.devolver(idPedido, idActor, datos).then(gestion));
   await invalidarCatalogo();
+  await invalidarReportes();
   return consulta;
 }

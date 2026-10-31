@@ -783,6 +783,51 @@
           }
         }
       ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Ventas por día",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/reportes/ventas?periodo=Dia"
+          }
+        },
+        {
+          "name": "Ventas por categoría",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/reportes/categorias"
+          }
+        },
+        {
+          "name": "Más vendidos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/reportes/mas-vendidos"
+          }
+        },
+        {
+          "name": "Pedidos cobrados",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/reportes/pedidos?estado=Pagado"
+          }
+        },
+        {
+          "name": "Carritos abandonados",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/reportes/carritos-abandonados"
+          }
+        }
+      ]
     }
   ]
 }
