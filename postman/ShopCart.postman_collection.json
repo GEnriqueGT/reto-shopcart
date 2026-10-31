@@ -828,6 +828,19 @@
           }
         }
       ]
+    },
+    {
+      "name": "Bitácora",
+      "item": [
+        {
+          "name": "Consultar bitácora",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/bitacora?modulo=Catalogo"
+          }
+        }
+      ]
     }
   ]
 }

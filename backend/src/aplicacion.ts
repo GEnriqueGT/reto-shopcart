@@ -16,6 +16,7 @@ import { rutasCarrito } from './modulos/carrito/presentacion/carrito.rutas.js';
 import { rutasPago } from './modulos/pago/presentacion/pago.rutas.js';
 import { rutasPedidos } from './modulos/pedidos/presentacion/pedidos.rutas.js';
 import { rutasReportes } from './modulos/reportes/presentacion/reportes.rutas.js';
+import { rutasBitacora } from './modulos/bitacora/presentacion/bitacora.rutas.js';
 import { cerrarPool } from './compartido/base-de-datos/pool.js';
 import { cerrarRedis } from './compartido/redis/cliente-redis.js';
 
@@ -36,6 +37,7 @@ export function crearAplicacion() {
   app.use(rutasPago());
   app.use(rutasPedidos());
   app.use(rutasReportes());
+  app.use(rutasBitacora());
   app.get('/openapi.json', (_req: Request, res: Response) => {
     res.json(documentoOpenApi());
   });
