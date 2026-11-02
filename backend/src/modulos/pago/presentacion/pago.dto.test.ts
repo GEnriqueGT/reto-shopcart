@@ -31,6 +31,9 @@ describe('dto de pago', () => {
     });
     assert.equal(pago.llave, 'pago-demo-01');
     assert.throws(() => dtoIniciarPago.parse({ idDireccion: 1, idMetodoEnvio: 2, llave: 'corta' }));
+    assert.throws(() =>
+      dtoIniciarPago.parse({ idDireccion: 1, idMetodoEnvio: 2, llave: '{{llavePago}}' }),
+    );
     const cobro = dtoCobrar.parse({ llave: 'pago-demo-01', aprobado: true });
     assert.equal(cobro.aprobado, true);
     assert.throws(() => dtoCobrar.parse({ llave: 'pago-demo-01', aprobado: true, tarjeta: '4111' }));

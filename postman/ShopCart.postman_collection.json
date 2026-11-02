@@ -653,6 +653,16 @@
           "name": "Iniciar pago",
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const llave = `pago-${Date.now()}-${crypto.randomUUID()}`.slice(0, 64);",
+                  "pm.environment.set('llavePago', llave);"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -678,6 +688,20 @@
         },
         {
           "name": "Cobrar pago",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const llave = pm.environment.get('llavePago');",
+                  "if (!llave || String(llave).includes('{{')) {",
+                  "  throw new Error('Ejecuta primero Iniciar pago. Esa request genera llavePago para el cobro.');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [

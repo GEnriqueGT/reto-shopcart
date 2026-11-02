@@ -20,17 +20,26 @@ export const dtoIdDireccion = z
   })
   .strict();
 
+const llaveIdempotencia = z
+  .string()
+  .trim()
+  .min(8)
+  .max(64)
+  .refine((valor) => !valor.includes('{{') && !valor.includes('}}'), {
+    message: 'La llave de idempotencia no es válida.',
+  });
+
 export const dtoIniciarPago = z
   .object({
     idDireccion: z.number().int().positive(),
     idMetodoEnvio: z.number().int().positive(),
-    llave: z.string().trim().min(8).max(64),
+    llave: llaveIdempotencia,
   })
   .strict();
 
 export const dtoCobrar = z
   .object({
-    llave: z.string().trim().min(8).max(64),
+    llave: llaveIdempotencia,
     aprobado: z.boolean(),
   })
   .strict();

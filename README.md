@@ -125,9 +125,9 @@ Entra con `POST /autenticacion/entrar`. El access token dura 15 minutos y el ref
 ## Probar con Postman
 
 1. Importa `postman/ShopCart.postman_collection.json`.
-2. Importa `postman/local.example.json` como entorno y selecciónalo.
+2. Importa `postman/local.example.json` como entorno y selecciónalo arriba a la derecha. Sin ese entorno, las variables se mandan literales.
 3. En el entorno, pon el correo y la contraseña de la tabla de arriba.
-4. Ejecuta **Entrar**. La request guarda `accessToken` y `refresco`. El entorno de ejemplo los deja vacíos a propósito.
+4. Ejecuta **Entrar**. La request guarda `accessToken` y `refresco`. El entorno de ejemplo los deja vacíos a propósito. **Iniciar pago** genera solo una `llavePago` nueva y **Cobrar** reutiliza esa misma llave.
 
 `{{baseUrl}}` apunta a `http://localhost:3000`. La colección recorre autenticación, catálogo, inventario, cupones, carrito, pago, pedidos, reportes y bitácora.
 

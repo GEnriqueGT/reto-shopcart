@@ -16,7 +16,7 @@
     { "key": "tokenCarrito", "value": "", "enabled": true },
     { "key": "idDireccion", "value": "", "enabled": true },
     { "key": "idPedido", "value": "", "enabled": true },
-    { "key": "llavePago", "value": "pago-demo-01", "enabled": true },
+    { "key": "llavePago", "value": "", "enabled": true },
     { "key": "idDetallePedido", "value": "", "enabled": true }
   ]
 }
