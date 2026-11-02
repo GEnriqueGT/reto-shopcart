@@ -18,6 +18,7 @@ const esquema = z.object({
   JWT_REFRESCO_SEGUNDOS: z.coerce.number().int().positive(),
   BCRYPT_COSTO: z.coerce.number().int().min(12).max(14),
   INTENTOS_MAXIMOS: z.coerce.number().int().positive(),
+  LIMITE_RUTA: z.coerce.number().int().positive(),
   VENTANA_INTENTOS_SEGUNDOS: z.coerce.number().int().positive(),
   GRACIA_REFRESCO_SEGUNDOS: z.coerce.number().int().positive(),
   USUARIO_ADMINISTRADOR_CORREO: correoInicial,

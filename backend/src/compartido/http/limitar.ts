@@ -4,10 +4,11 @@ import { ErrorAplicacion } from '../errores/error-aplicacion.js';
 import { obtenerRedis } from '../redis/cliente-redis.js';
 import { esperaAleatoria } from '../../modulos/autenticacion/dominio/espera.js';
 
-export function limitar(nombre: string) {
+export function limitar(nombre: string, tipo: 'login' | 'ruta' = 'ruta') {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    const maximo = leerEntorno().INTENTOS_MAXIMOS;
-    const ventana = leerEntorno().VENTANA_INTENTOS_SEGUNDOS;
+    const entorno = leerEntorno();
+    const maximo = tipo === 'login' ? entorno.INTENTOS_MAXIMOS : entorno.LIMITE_RUTA;
+    const ventana = entorno.VENTANA_INTENTOS_SEGUNDOS;
     const claves = [`limite:${nombre}:ip:${req.ip ?? 'desconocida'}`];
     if (req.usuario) {
       claves.push(`limite:${nombre}:usuario:${req.usuario.IDUsuario}`);

@@ -13,7 +13,7 @@ export function rutasAutenticacion(): Router {
     next();
   });
   router.post('/autenticacion/registro', sesion({ publica: true }), limitar('registro'), controlador.registrar);
-  router.post('/autenticacion/entrar', sesion({ publica: true }), limitar('entrar'), controlador.entrar);
+  router.post('/autenticacion/entrar', sesion({ publica: true }), limitar('entrar', 'login'), controlador.entrar);
   router.post('/autenticacion/refrescar', sesion({ publica: true }), limitar('refrescar'), controlador.refrescar);
   router.post('/autenticacion/salir', sesion(), controlador.salir);
   router.get('/autenticacion/yo', sesion(), fijarDueno(), controlador.yo);

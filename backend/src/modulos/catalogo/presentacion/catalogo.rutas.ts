@@ -12,12 +12,21 @@ export function rutasCatalogo(): Router {
     next();
   });
 
-  const publico = [sesion({ publica: true }), limitar('catalogo.publico')] as const;
   const admin = [sesion(), exigirRol('Administrador')] as const;
 
-  router.get('/catalogo/categorias', ...publico, controlador.listarCategoriasActivas);
-  router.get('/catalogo/productos', ...publico, controlador.buscar);
-  router.get('/catalogo/productos/:idProducto', ...publico, controlador.consultarProducto);
+  router.get(
+    '/catalogo/categorias',
+    sesion({ publica: true }),
+    limitar('catalogo.categorias'),
+    controlador.listarCategoriasActivas,
+  );
+  router.get('/catalogo/productos', sesion({ publica: true }), limitar('catalogo.productos'), controlador.buscar);
+  router.get(
+    '/catalogo/productos/:idProducto',
+    sesion({ publica: true }),
+    limitar('catalogo.producto'),
+    controlador.consultarProducto,
+  );
 
   router.get('/catalogo/mantenimiento/categorias', ...admin, controlador.listarCategorias);
   router.post('/catalogo/categorias', ...admin, controlador.crearCategoria);
