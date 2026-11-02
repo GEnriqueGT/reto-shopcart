@@ -498,7 +498,10 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Carrito-Token", "value": "{{tokenCarrito}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
+            ],
             "url": "{{baseUrl}}/carrito"
           }
         },
@@ -520,6 +523,7 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
             ],
             "body": {
@@ -535,6 +539,7 @@
             "method": "PATCH",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
             ],
             "body": {
@@ -550,6 +555,7 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
             ],
             "body": {
@@ -563,7 +569,10 @@
           "name": "Quitar cupón",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Carrito-Token", "value": "{{tokenCarrito}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
+            ],
             "url": "{{baseUrl}}/carrito/cupon"
           }
         },
@@ -571,7 +580,10 @@
           "name": "Quitar ítem",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Carrito-Token", "value": "{{tokenCarrito}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Carrito-Token", "value": "{{tokenCarrito}}" }
+            ],
             "url": "{{baseUrl}}/carrito/items/{{idVariante}}"
           }
         },
