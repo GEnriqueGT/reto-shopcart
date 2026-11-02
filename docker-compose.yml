@@ -38,6 +38,7 @@ services:
     environment:
       SQL_CONTRASENA_SA: ${SQL_CONTRASENA_SA}
       SQL_CONTRASENA_APP: ${SQL_CONTRASENA_APP}
+      SEMILLA_DATOS: ${SEMILLA_DATOS:-0}
     volumes:
       - ./base-de-datos/scripts:/scripts:ro
       - ./base-de-datos/iniciar.sh:/iniciar.sh:ro

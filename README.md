@@ -55,7 +55,7 @@ USUARIO_CLIENTE_CONTRASENA=Cliente_Demo_2026!
 
 Con `docker compose up` el SQL remoto no se usa. El servicio `api` deja `SQL_SERVIDOR` en `sqlserver` y lo que esté en `.env` no llega a la API. `sql-inicial` aplica los scripts ahí, no en el SQL remoto. Si el SQL es remoto, la API se levanta sin ese contenedor, se apunta el host en `.env` y ese servidor ya tiene que tener la base, el login `shopcart_app` y los scripts del `001` al `010`. Si el host no responde o el login no existe, el proceso termina.
 
-El resto del ejemplo también va en ese archivo: `PUERTO_API` (opcional, por defecto 3000), secretos JWT, bcrypt, `INTENTOS_MAXIMOS` del login, `LIMITE_RUTA` del resto de endpoints, minutos de reserva y de carrito abandonado. Los dos secretos JWT son obligatorios, distintos y de al menos 32 caracteres.
+El resto del ejemplo también va en ese archivo: `PUERTO_API` (opcional, por defecto 3000), secretos JWT, bcrypt, `INTENTOS_MAXIMOS` del login, `LIMITE_RUTA` del resto de endpoints, minutos de reserva y de carrito abandonado, y `SEMILLA_DATOS` (`1` aplica la semilla de rendimiento, `0` la omite). Los dos secretos JWT son obligatorios, distintos y de al menos 32 caracteres.
 
 Comprueba el arranque:
 
@@ -72,7 +72,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-El contenedor `sql-inicial` aplica `base-de-datos/scripts` en orden, del `001` al `010`, una sola vez. La API espera a que ese paso termine y a que Redis responda.
+El contenedor `sql-inicial` aplica `base-de-datos/scripts` en orden, del `001` al `010`, una sola vez. Si `SEMILLA_DATOS=1`, también aplica `011_semilla.sql` (catálogo, existencias, cupones, pedidos pagados y carritos abandonados para listados y reportes). Con `SEMILLA_DATOS=0` omite esa semilla. La API espera a que ese paso termine y a que Redis responda.
 
 Los scripts no son idempotentes. Si el volumen de SQL ya existía y cambiaste un script, hay que recrearlo:
 
@@ -90,7 +90,7 @@ SQL_SERVIDOR=localhost
 REDIS_URL=redis://127.0.0.1:6379
 ```
 
-SQL Server Express tiene que estar en el puerto 1433 y Redis en el 6379. Los scripts se aplican en orden, del `001` al `010`, con `sqlcmd`. `-I` deja `QUOTED_IDENTIFIER` encendido, que hace falta para los índices filtrados. `ContrasenaApp` es la contraseña de `SQL_CONTRASENA_APP` y crea el login `shopcart_app`.
+SQL Server Express tiene que estar en el puerto 1433 y Redis en el 6379. Los scripts se aplican en orden, del `001` al `010`, con `sqlcmd`. El `011_semilla.sql` solo si quieres datos de prueba. `-I` deja `QUOTED_IDENTIFIER` encendido, que hace falta para los índices filtrados. `ContrasenaApp` es la contraseña de `SQL_CONTRASENA_APP` y crea el login `shopcart_app`.
 
 ```bash
 sqlcmd -C -I -f 65001 -S localhost -U sa -b -v ContrasenaApp=Datos_Demo_2026! -i base-de-datos/scripts/001_crear_base.sql
