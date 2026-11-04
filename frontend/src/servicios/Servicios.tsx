@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { consultarSalud, type Salud } from '../api/salud';
-import { Panel } from '../ui/Panel';
+import { Panel } from '../compartido/ui/Panel';
+import { consultarSalud, type Salud } from './api';
 
 type EstadoSalud = 'cargando' | 'ok' | 'error' | 'offline';
 
-export function Inicio() {
+export function Servicios() {
   const [estado, setEstado] = useState<EstadoSalud>('cargando');
   const [salud, setSalud] = useState<Salud | null>(null);
 
@@ -79,9 +79,9 @@ export function Inicio() {
           </div>
 
           <div className="mt-8 grid grid-cols-3 gap-3 md:mt-0 md:gap-4">
-            <Servicio titulo="API" valor={salud?.chequeos.api ?? '—'} ok={!salud || salud.chequeos.api === 'up'} />
-            <Servicio titulo="SQL" valor={salud?.chequeos.sql ?? '—'} ok={!salud || salud.chequeos.sql === 'up'} />
-            <Servicio
+            <Chequeo titulo="API" valor={salud?.chequeos.api ?? '—'} ok={!salud || salud.chequeos.api === 'up'} />
+            <Chequeo titulo="SQL" valor={salud?.chequeos.sql ?? '—'} ok={!salud || salud.chequeos.sql === 'up'} />
+            <Chequeo
               titulo="Redis"
               valor={salud?.chequeos.redis ?? '—'}
               ok={!salud || salud.chequeos.redis === 'up'}
@@ -98,7 +98,7 @@ export function Inicio() {
   );
 }
 
-function Servicio({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolean }) {
+function Chequeo({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolean }) {
   return (
     <div className="grid justify-items-center gap-2 text-center md:rounded-2xl md:bg-white/50 md:px-3 md:py-4">
       <span className="sc-glass grid h-14 w-14 place-items-center rounded-full text-sm font-semibold text-slate-900 md:h-16 md:w-16">
