@@ -25,7 +25,12 @@ export function crearAplicacion() {
   app.disable('x-powered-by');
   app.set('trust proxy', false);
   app.use(helmet());
-  app.use(cors({ origin: origenesPermitidos() }));
+  app.use(
+    cors({
+      origin: origenesPermitidos(),
+      exposedHeaders: ['Carrito-Token'],
+    }),
+  );
   app.use(compression());
   app.use(express.json({ limit: '32kb' }));
   app.use(rutasSalud());

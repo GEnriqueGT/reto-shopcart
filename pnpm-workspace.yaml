@@ -1,5 +1,6 @@
 packages:
   - backend
+  - frontend
 
 shamefullyHoist: true
 
@@ -12,6 +13,7 @@ allowBuilds:
 overrides:
   "@azure/msal-node": 7.1.1
   "@azure/msal-common": 16.14.3
+  minimatch: 11.0.4
 
 ignoredBuiltDependencies:
   - "@scarf/scarf"

@@ -72,7 +72,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-El contenedor `sql-inicial` aplica `base-de-datos/scripts` en orden, del `001` al `010`, una sola vez. Si `SEMILLA_DATOS=1`, también aplica `011_semilla.sql` (catálogo, existencias, cupones, pedidos pagados y carritos abandonados para listados y reportes). Con `SEMILLA_DATOS=0` omite esa semilla. La API espera a que ese paso termine y a que Redis responda.
+El contenedor `sql-inicial` aplica `base-de-datos/scripts` en orden, del `001` al `010`, una sola vez. Si `SEMILLA_DATOS=1`, también aplica `011_semilla.sql` (catálogo, existencias, cupones, pedidos pagados y carritos abandonados para listados y reportes). Con `SEMILLA_DATOS=0` omite esa semilla. La API espera a que ese paso termine y a que Redis responda. El servicio `frontend` construye el build de Vite y lo sirve con nginx en [http://localhost:5173](http://localhost:5173); nginx reenvía `/api` a la API. No hace falta Node ni pnpm en el host para esa ruta.
 
 Los scripts no son idempotentes. Si el volumen de SQL ya existía y cambiaste un script, hay que recrearlo:
 
@@ -107,6 +107,20 @@ pnpm --dir backend dev
 ```
 
 `dev` recarga al guardar. Para dejarlo compilado: `pnpm --dir backend build` y después `pnpm --dir backend start`.
+
+## Frontend
+
+React + TypeScript + Vite + HeroUI v3 + Tailwind CSS v4, con estética glass. Con Docker, el front sale en el mismo `compose up` (puerto 5173). Para desarrollar con HMR en el host (Node 24 + Corepack / pnpm del monorepo), con la API en el 3000:
+
+```bash
+corepack enable
+pnpm install
+pnpm --dir frontend dev
+```
+
+Abre [http://localhost:5173](http://localhost:5173). El home consulta `GET /health`. Por defecto las peticiones van a `/api` (proxy de Vite en dev; nginx en Docker). Si quieres llamar la API directo, copia `frontend/.env.example` a `frontend/.env` y fija `VITE_API_URL`.
+
+Antes de cerrar cada fase del front: `pnpm audit` sin avisos abiertos. Los overrides del workspace (p. ej. `minimatch`) cierran hallazgos de la cadena de suministro.
 
 ## Credenciales de prueba
 
