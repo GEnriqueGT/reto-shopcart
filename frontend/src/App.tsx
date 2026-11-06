@@ -6,6 +6,8 @@ import { Cuenta } from './cuenta/Cuenta';
 import { RutaProtegida } from './layout/RutaProtegida';
 import { Shell } from './layout/Shell';
 import { Servicios } from './servicios/Servicios';
+import { Producto } from './tienda/Producto';
+import { Tienda } from './tienda/Tienda';
 
 export default function App() {
   return (
@@ -16,11 +18,13 @@ export default function App() {
             <Route index element={<Entrar />} />
             <Route path="registro" element={<Registro />} />
             <Route path="servicios" element={<Servicios />} />
+            <Route path="tienda" element={<Tienda />} />
+            <Route path="tienda/:idProducto" element={<Producto />} />
             <Route path="entrar" element={<Navigate to="/" replace />} />
             <Route element={<RutaProtegida />}>
               <Route path="cuenta" element={<Cuenta />} />
             </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/tienda" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

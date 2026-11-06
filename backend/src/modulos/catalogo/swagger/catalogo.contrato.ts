@@ -119,6 +119,7 @@ const busqueda = z
         Categoria: z.string(),
         PrecioDesde: z.string(),
         Disponible: z.boolean(),
+        ImagenUrl: z.string().nullable(),
       }),
     ),
     total: z.number().int(),

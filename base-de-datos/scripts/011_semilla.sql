@@ -85,7 +85,7 @@ CROSS JOIN Modelos n;
 INSERT INTO ImagenProducto (IDProducto, Url, Orden)
 SELECT
   p.IDProducto,
-  CONCAT(N'https://cdn.shopcart.demo/productos/', p.IDProducto, N'.jpg'),
+  CONCAT(N'https://picsum.photos/seed/shopcart-', p.IDProducto, N'/640/480'),
   0
 FROM Producto p
 JOIN Categoria c ON c.IDCategoria = p.IDCategoria

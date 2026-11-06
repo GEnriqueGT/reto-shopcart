@@ -75,7 +75,10 @@ export function Entrar() {
         </p>
       </Panel>
 
-      <p className="mt-6 text-center text-sm">
+      <p className="mt-6 flex flex-col items-center gap-2 text-center text-sm">
+        <Link className="font-medium text-slate-900 underline-offset-2 hover:underline" to="/tienda">
+          Ir a la tienda
+        </Link>
         <Link className="sc-muted underline-offset-2 hover:text-slate-900 hover:underline" to="/servicios">
           Verificación de los servicios
         </Link>

@@ -35,6 +35,7 @@ export const esquemaProductoListado = z
     Categoria: z.string().min(1).max(80),
     PrecioDesde: dinero,
     Disponible: bit,
+    ImagenUrl: z.string().min(1).max(500).nullable(),
   })
   .strict();
 

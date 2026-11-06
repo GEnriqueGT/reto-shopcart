@@ -407,13 +407,25 @@ BEGIN
   GROUP BY p.IDProducto, p.Nombre, p.IDCategoria, c.Nombre, p.CreadoEn
   HAVING @SoloDisponibles = 0 OR MAX(CASE WHEN v.Existencia > 0 THEN 1 ELSE 0 END) = 1;
 
-  SELECT IDProducto, Nombre, IDCategoria, Categoria, PrecioDesde, Disponible
-  FROM #Coincidente
+  SELECT
+    c.IDProducto,
+    c.Nombre,
+    c.IDCategoria,
+    c.Categoria,
+    c.PrecioDesde,
+    c.Disponible,
+    (
+      SELECT TOP (1) i.Url
+      FROM ImagenProducto i
+      WHERE i.IDProducto = c.IDProducto
+      ORDER BY i.Orden, i.IDImagenProducto
+    ) AS ImagenUrl
+  FROM #Coincidente c
   ORDER BY
-    CASE WHEN @Orden = N'precio_asc' THEN PrecioDesde END ASC,
-    CASE WHEN @Orden = N'precio_desc' THEN PrecioDesde END DESC,
-    CASE WHEN @Orden = N'reciente' THEN CreadoEn END DESC,
-    Nombre ASC
+    CASE WHEN @Orden = N'precio_asc' THEN c.PrecioDesde END ASC,
+    CASE WHEN @Orden = N'precio_desc' THEN c.PrecioDesde END DESC,
+    CASE WHEN @Orden = N'reciente' THEN c.CreadoEn END DESC,
+    c.Nombre ASC
   OFFSET (@Pagina - 1) * @Tamano ROWS FETCH NEXT @Tamano ROWS ONLY;
 
   SELECT COUNT(*) AS Total FROM #Coincidente;
