@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { Button } from '@heroui/react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { agregarItem, claveCarrito } from '../carrito/api';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
 import { Panel } from '../compartido/ui/Panel';
@@ -10,6 +12,10 @@ import { quetzales } from './dinero';
 export function Producto() {
   const { idProducto } = useParams();
   const id = Number(idProducto);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [errorAgregar, setErrorAgregar] = useState<string | null>(null);
+  const [cantidad, setCantidad] = useState(1);
 
   const consulta = useQuery({
     queryKey: ['catalogo', 'producto', id],
@@ -22,6 +28,8 @@ export function Producto() {
 
   useEffect(() => {
     setIdVariante(null);
+    setCantidad(1);
+    setErrorAgregar(null);
   }, [id]);
 
   const variante = useMemo(() => {
@@ -30,10 +38,26 @@ export function Producto() {
     return elegida ?? variantes[0] ?? null;
   }, [variantes, idVariante]);
 
+  useEffect(() => {
+    setCantidad(1);
+  }, [variante?.IDVariante]);
+
   const imagenes = useMemo(
     () => [...(consulta.data?.imagenes ?? [])].sort((a, b) => a.Orden - b.Orden),
     [consulta.data?.imagenes],
   );
+
+  const mutAgregar = useMutation({
+    mutationFn: () => {
+      if (!variante) throw new Error('Elige una variante.');
+      return agregarItem(variante.IDVariante, cantidad);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: claveCarrito });
+      navigate('/carrito');
+    },
+    onError: (err) => setErrorAgregar(mensajeDeError(err)),
+  });
 
   if (!Number.isInteger(id) || id <= 0) {
     return (
@@ -42,6 +66,9 @@ export function Producto() {
       </Estado>
     );
   }
+
+  const maxCantidad = variante?.Existencia ?? 0;
+  const puedeAgregar = Boolean(variante && maxCantidad > 0 && cantidad >= 1 && cantidad <= maxCantidad);
 
   return (
     <div className="pb-4">
@@ -127,7 +154,9 @@ export function Producto() {
                             </span>
                             <span className="shrink-0 text-right text-sm">
                               <span className="block font-semibold">{quetzales(v.Precio)}</span>
-                              <span className={`block text-xs ${v.Existencia > 0 ? 'text-[var(--sc-ok)]' : 'sc-muted'}`}>
+                              <span
+                                className={`block text-xs ${v.Existencia > 0 ? 'text-[var(--sc-ok)]' : 'sc-muted'}`}
+                              >
                                 {v.Existencia > 0 ? `${v.Existencia} en stock` : 'Agotado'}
                               </span>
                             </span>
@@ -141,6 +170,46 @@ export function Producto() {
                     <div className="mt-5 border-t border-slate-900/5 pt-4">
                       <p className="sc-display text-2xl text-slate-900">{quetzales(variante.Precio)}</p>
                       <p className="sc-muted mt-1 text-sm">SKU {variante.Sku}</p>
+
+                      {maxCantidad > 0 && (
+                        <div className="mt-4 flex items-center gap-2">
+                          <button
+                            type="button"
+                            aria-label="Menos"
+                            disabled={cantidad <= 1 || mutAgregar.isPending}
+                            onClick={() => setCantidad((n) => Math.max(1, n - 1))}
+                            className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
+                          >
+                            −
+                          </button>
+                          <span className="min-w-8 text-center text-sm font-semibold tabular-nums">
+                            {cantidad}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="Más"
+                            disabled={cantidad >= maxCantidad || mutAgregar.isPending}
+                            onClick={() => setCantidad((n) => Math.min(maxCantidad, n + 1))}
+                            className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+
+                      <Button
+                        className="mt-4"
+                        fullWidth
+                        isDisabled={!puedeAgregar}
+                        isPending={mutAgregar.isPending}
+                        onPress={() => {
+                          setErrorAgregar(null);
+                          mutAgregar.mutate();
+                        }}
+                      >
+                        Agregar al carrito
+                      </Button>
+                      {errorAgregar && <p className="mt-3 text-sm text-red-600">{errorAgregar}</p>}
                     </div>
                   )}
                 </Panel>

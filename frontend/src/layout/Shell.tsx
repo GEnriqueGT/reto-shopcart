@@ -1,25 +1,190 @@
-import { Button } from '@heroui/react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../autenticacion/AuthContexto';
+import { claveCarrito, consultarCarrito } from '../carrito/api';
+import { Desplazamiento } from '../compartido/ui/Desplazamiento';
 import { EstadoPie } from '../servicios/EstadoPie';
 
-const enlace = 'rounded-full px-3 py-1.5 transition hover:bg-slate-900/5';
-const activo = 'font-medium text-slate-900 bg-slate-900/5';
+const trazo = 2.05;
 
-function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
+/** Escaparate / tienda para el acceso al catálogo. */
+function IconoTienda() {
   return (
-    <NavLink to={to} className={({ isActive }) => `${enlace} ${isActive ? activo : ''}`}>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4.5 10.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-8.5"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 7.5 5.2 4.2A1.5 1.5 0 0 1 6.5 3.5h11a1.5 1.5 0 0 1 1.3.7L20.5 7.5"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3.5 7.5h17" stroke="currentColor" strokeWidth={trazo} strokeLinecap="round" />
+      <path
+        d="M10 20.5v-6h4v6"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconoCarrito() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3.5 5h1.6l1.3 9.2a1.5 1.5 0 0 0 1.5 1.3h8.4a1.5 1.5 0 0 0 1.5-1.2L19.5 8H7"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="9.5" cy="19" r="1.35" fill="currentColor" />
+      <circle cx="16.5" cy="19" r="1.35" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconoUsuario() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="9" r="3.35" stroke="currentColor" strokeWidth={trazo} />
+      <path
+        d="M5.5 19.25c1.4-2.8 3.7-4.25 6.5-4.25s5.1 1.45 6.5 4.25"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconoSalir() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M10 5.5H7.5A2 2 0 0 0 5.5 7.5v9a2 2 0 0 0 2 2H10M14 8.5 18.5 12 14 15.5M18 12H10"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconoPedidos() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M7.5 4.5h9A1.5 1.5 0 0 1 18 6v13.2l-3.2-1.8-2.8 1.8-2.8-1.8L6 19.2V6a1.5 1.5 0 0 1 1.5-1.5Z"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinejoin="round"
+      />
+      <path d="M9 9h6M9 12.5h6" stroke="currentColor" strokeWidth={trazo} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconoOperador() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4.5 8.5 12 4.5l7.5 4V19a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4.5 19V8.5Z"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 20.5v-6h5v6" stroke="currentColor" strokeWidth={trazo} strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconoAdmin() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="3.1" stroke="currentColor" strokeWidth={trazo} />
+      <path
+        d="M12 4.5v2.2M12 17.3v2.2M4.5 12h2.2M17.3 12h2.2M6.7 6.7l1.6 1.6M15.7 15.7l1.6 1.6M17.3 6.7l-1.6 1.6M8.3 15.7l-1.6 1.6"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconoReportes() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4.5 19.5h15M7 19.5V11M12 19.5V6.5M17 19.5v-5"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** Botón redondo suelto (usuario / carrito). */
+function NavIcono({
+  to,
+  label,
+  children,
+  badge,
+}: {
+  to: string;
+  label: string;
+  children: React.ReactNode;
+  badge?: number;
+}) {
+  return (
+    <NavLink
+      to={to}
+      aria-label={label}
+      title={label}
+      className={({ isActive }) =>
+        `sc-round-btn relative ${isActive ? 'sc-round-btn-activo' : ''}`
+      }
+    >
       {children}
+      {badge != null && badge > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-slate-900 px-1 text-[10px] font-semibold leading-4 text-white">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </NavLink>
   );
 }
 
-function NavMovil({ to, children }: { to: string; children: React.ReactNode }) {
+/** Ítem dentro de la barra compartida de secciones. */
+function NavBarraItem({
+  to,
+  label,
+  children,
+}: {
+  to: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <NavLink
       to={to}
+      aria-label={label}
+      title={label}
       className={({ isActive }) =>
-        `flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+        `relative flex items-center justify-center rounded-full px-4 py-2.5 ${
           isActive ? 'sc-nav-item-activo' : 'sc-nav-item'
         }`
       }
@@ -29,10 +194,89 @@ function NavMovil({ to, children }: { to: string; children: React.ReactNode }) {
   );
 }
 
+function BarraSecciones({
+  es,
+  autenticado,
+}: {
+  es: (...roles: string[]) => boolean;
+  autenticado: boolean;
+}) {
+  return (
+    <div className="sc-nav flex items-center gap-1 rounded-full px-2 py-1.5">
+      <NavBarraItem to="/tienda" label="Tienda">
+        <IconoTienda />
+      </NavBarraItem>
+      {autenticado && (
+        <NavBarraItem to="/pedidos" label="Pedidos">
+          <IconoPedidos />
+        </NavBarraItem>
+      )}
+      {es('Operador', 'Administrador') && (
+        <NavBarraItem to="/operador" label="Operador">
+          <IconoOperador />
+        </NavBarraItem>
+      )}
+      {es('Administrador') && (
+        <NavBarraItem to="/admin" label="Admin">
+          <IconoAdmin />
+        </NavBarraItem>
+      )}
+      {es('Administrador') && (
+        <NavBarraItem to="/reportes" label="Reportes">
+          <IconoReportes />
+        </NavBarraItem>
+      )}
+    </div>
+  );
+}
+
 export function Shell() {
-  const { usuario, cargando, salir } = useAuth();
+  const { usuario, cargando, salir, es } = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const enAuth = !usuario && (pathname === '/' || pathname === '/registro');
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const botonUsuarioRef = useRef<HTMLButtonElement>(null);
+
+  const carrito = useQuery({
+    queryKey: claveCarrito,
+    queryFn: consultarCarrito,
+    enabled: !enAuth,
+  });
+  const piezas = carrito.data?.items.reduce((suma, item) => suma + item.Cantidad, 0) ?? 0;
+
+  useEffect(() => {
+    setMenuAbierto(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuAbierto) return;
+
+    function alPointer(evento: MouseEvent | TouchEvent) {
+      const nodo = evento.target as Node | null;
+      if (!nodo) return;
+      if (menuRef.current?.contains(nodo)) return;
+      if (botonUsuarioRef.current?.contains(nodo)) return;
+      setMenuAbierto(false);
+    }
+
+    function alTecla(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') setMenuAbierto(false);
+    }
+
+    const id = window.setTimeout(() => {
+      document.addEventListener('mousedown', alPointer);
+      document.addEventListener('touchstart', alPointer);
+    }, 0);
+    document.addEventListener('keydown', alTecla);
+    return () => {
+      window.clearTimeout(id);
+      document.removeEventListener('mousedown', alPointer);
+      document.removeEventListener('touchstart', alPointer);
+      document.removeEventListener('keydown', alTecla);
+    };
+  }, [menuAbierto]);
 
   return (
     <div
@@ -42,38 +286,79 @@ export function Shell() {
           : 'relative flex min-h-dvh flex-col pb-24 pt-5 md:pb-8 md:pt-8'
       }
     >
-      <header className="sc-shell flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <NavLink to="/tienda" className="flex items-center gap-2.5">
-          <span className="sc-glass-strong grid h-9 w-9 place-items-center rounded-xl md:h-10 md:w-10" aria-hidden>
-            <span className="grid grid-cols-2 gap-0.5">
-              <i className="block h-2 w-2 rounded-[3px] bg-slate-900" />
-              <i className="block h-2 w-2 rounded-[3px] bg-slate-900/55" />
-              <i className="block h-2 w-2 rounded-[3px] bg-slate-900/55" />
-              <i className="block h-2 w-2 rounded-[3px] bg-slate-900" />
-            </span>
-          </span>
-          <span className="sc-display text-xl tracking-tight text-slate-900 md:text-2xl">ShopCart</span>
+      <header className="sc-shell flex shrink-0 flex-col gap-4 md:gap-5">
+        <NavLink
+          to="/tienda"
+          className="sc-marca block w-full text-center text-[1.65rem] leading-none md:text-[2.15rem]"
+        >
+          ShopCart
         </NavLink>
 
         {!enAuth && (
-          <nav className="sc-muted order-3 hidden w-full items-center justify-center gap-1 text-sm md:order-none md:flex md:w-auto">
-            <NavItem to="/tienda">Tienda</NavItem>
-            {usuario ? <NavItem to="/cuenta">Cuenta</NavItem> : <NavItem to="/">Entrar</NavItem>}
-          </nav>
-        )}
+          <div className="relative grid grid-cols-[1fr_auto] items-center gap-3 md:grid-cols-[1fr_auto_1fr]">
+            <div className="hidden md:block" aria-hidden />
+            <div className="hidden justify-center md:flex">
+              <BarraSecciones es={es} autenticado={!!usuario} />
+            </div>
+            <div className="col-start-2 flex items-center justify-end gap-2 md:col-start-3">
+              {usuario ? (
+                <>
+                  <button
+                    ref={botonUsuarioRef}
+                    type="button"
+                    aria-label="Cuenta"
+                    aria-expanded={menuAbierto}
+                    title="Cuenta"
+                    onClick={() => setMenuAbierto((v) => !v)}
+                    className={`sc-round-btn ${menuAbierto ? 'sc-round-btn-activo' : ''}`}
+                  >
+                    {cargando ? <span className="text-xs">…</span> : <IconoUsuario />}
+                  </button>
 
-        {usuario && (
-          <div className="flex items-center gap-2 text-sm">
-            {cargando ? (
-              <span className="sc-muted">…</span>
-            ) : (
-              <>
-                <span className="sc-muted hidden max-w-[14rem] truncate sm:inline">{usuario.Correo}</span>
-                <Button size="sm" variant="secondary" onPress={() => void salir()}>
-                  Salir
-                </Button>
-              </>
-            )}
+                  {menuAbierto && (
+                    <div
+                      ref={menuRef}
+                      role="menu"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      className="sc-glass sc-flotante absolute right-12 top-[calc(100%+0.55rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] p-1.5 shadow-[0_22px_48px_rgb(15_23_42/0.14)]"
+                    >
+                      <Link
+                        role="menuitem"
+                        to="/cuenta"
+                        onClick={() => setMenuAbierto(false)}
+                        className="block truncate rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-slate-900/5"
+                      >
+                        {usuario.Correo}
+                      </Link>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setMenuAbierto(false);
+                          void (async () => {
+                            await salir();
+                            navigate('/tienda');
+                          })();
+                        }}
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                      >
+                        <IconoSalir />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <NavIcono to="/" label="Entrar">
+                  <IconoUsuario />
+                </NavIcono>
+              )}
+
+              <NavIcono to="/carrito" label="Carrito" badge={piezas}>
+                <IconoCarrito />
+              </NavIcono>
+            </div>
           </div>
         )}
       </header>
@@ -89,13 +374,11 @@ export function Shell() {
       </main>
 
       {!enAuth && <EstadoPie />}
+      {!enAuth && <Desplazamiento />}
 
       {!enAuth && (
-        <nav className="sc-shell fixed inset-x-0 bottom-4 z-20 md:hidden">
-          <div className="sc-nav mx-auto flex w-full items-center justify-center gap-1 rounded-full px-2 py-2">
-            <NavMovil to="/tienda">Tienda</NavMovil>
-            {usuario ? <NavMovil to="/cuenta">Cuenta</NavMovil> : <NavMovil to="/">Entrar</NavMovil>}
-          </div>
+        <nav className="sc-shell fixed inset-x-0 bottom-4 z-20 flex justify-center md:hidden">
+          <BarraSecciones es={es} autenticado={!!usuario} />
         </nav>
       )}
     </div>

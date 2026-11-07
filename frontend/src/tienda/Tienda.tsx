@@ -1,4 +1,4 @@
-import { Label, ListBox, Select, Slider } from '@heroui/react';
+import { Label, Slider } from '@heroui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -264,127 +264,142 @@ export function Tienda() {
             ref={flotanteRef}
             role="dialog"
             aria-label="Filtros del catálogo"
-            className="sc-glass sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(20.5rem,calc(100vw-1.5rem))] rounded-[1.35rem] p-4 shadow-[0_22px_48px_rgb(15_23_42/0.14)]"
+            className="sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-900/10 bg-white p-1.5 shadow-[0_18px_40px_rgb(15_23_42/0.12)]"
           >
-            <div className="flex justify-center">
-              <div className="sc-mini-tabs" role="tablist" aria-label="Tipo de filtro">
-                {tabsFiltro.map((tab) => {
-                  const activo = tabFiltro === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={activo}
-                      onClick={() => setTabFiltro(tab.id)}
-                      className={`sc-mini-tab ${activo ? 'sc-mini-tab-activo' : ''}`}
-                    >
-                      {tab.etiqueta}
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="flex gap-0.5 p-0.5" role="tablist" aria-label="Tipo de filtro">
+              {tabsFiltro.map((tab) => {
+                const activo = tabFiltro === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activo}
+                    onClick={() => setTabFiltro(tab.id)}
+                    className={`flex-1 rounded-xl px-2 py-2 text-xs font-medium transition ${
+                      activo
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-500 hover:bg-slate-900/5 hover:text-slate-800'
+                    }`}
+                  >
+                    {tab.etiqueta}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-1 max-h-64 overflow-y-auto">
               {tabFiltro === 'categoria' && (
-                <Select
-                  className="w-full"
-                  placeholder="Todas"
-                  selectedKey={filtros.idCategoria ? String(filtros.idCategoria) : 'todas'}
-                  onSelectionChange={(clave) => {
-                    const valor = clave == null ? 'todas' : String(clave);
-                    aplicar({
-                      idCategoria: valor === 'todas' ? undefined : Number(valor),
-                    });
-                  }}
-                >
-                  <Label>Categoría</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item id="todas" textValue="Todas">
-                        Todas
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      {(categorias.data ?? []).map((cat) => (
-                        <ListBox.Item
-                          key={cat.IDCategoria}
-                          id={String(cat.IDCategoria)}
-                          textValue={cat.Nombre}
-                        >
-                          {cat.Nombre}
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
+                <div role="listbox" aria-label="Categoría">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={!filtros.idCategoria}
+                    onClick={() => aplicar({ idCategoria: undefined })}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
+                      !filtros.idCategoria
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-700 hover:bg-slate-900/5'
+                    }`}
+                  >
+                    Todas
+                    {!filtros.idCategoria && <span aria-hidden>✓</span>}
+                  </button>
+                  {(categorias.data ?? []).map((cat) => {
+                    const activo = filtros.idCategoria === cat.IDCategoria;
+                    return (
+                      <button
+                        key={cat.IDCategoria}
+                        type="button"
+                        role="option"
+                        aria-selected={activo}
+                        onClick={() => aplicar({ idCategoria: cat.IDCategoria })}
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
+                          activo
+                            ? 'bg-slate-900 text-white'
+                            : 'text-slate-700 hover:bg-slate-900/5'
+                        }`}
+                      >
+                        {cat.Nombre}
+                        {activo && <span aria-hidden>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
 
               {tabFiltro === 'precio' && (
-                <Slider
-                  className="sc-slider w-full"
-                  minValue={0}
-                  maxValue={PRECIO_TOPE}
-                  step={PRECIO_PASO}
-                  value={rango}
-                  onChange={(valor) => {
-                    if (Array.isArray(valor) && valor.length === 2) {
-                      setRango([valor[0]!, valor[1]!]);
-                    }
-                  }}
-                  formatOptions={{ style: 'currency', currency: 'GTQ', currencyDisplay: 'narrowSymbol' }}
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <Label>Rango</Label>
-                    <Slider.Output className="sc-muted text-xs tabular-nums">
-                      {({ state }) =>
-                        `${quetzales(formatearPrecio(state.values[0] ?? 0))} – ${quetzales(
-                          formatearPrecio(state.values[1] ?? PRECIO_TOPE),
-                        )}`
+                <div className="px-3 py-3">
+                  <Slider
+                    className="sc-slider w-full"
+                    minValue={0}
+                    maxValue={PRECIO_TOPE}
+                    step={PRECIO_PASO}
+                    value={rango}
+                    onChange={(valor) => {
+                      if (Array.isArray(valor) && valor.length === 2) {
+                        setRango([valor[0]!, valor[1]!]);
                       }
-                    </Slider.Output>
-                  </div>
-                  <Slider.Track className="bg-white/90">
-                    {({ state }) => (
-                      <>
-                        <Slider.Fill className="bg-slate-300/70" />
-                        {state.values.map((_, i) => (
-                          <Slider.Thumb key={i} index={i} className="sc-slider-thumb" />
-                        ))}
-                      </>
-                    )}
-                  </Slider.Track>
-                </Slider>
+                    }}
+                    formatOptions={{
+                      style: 'currency',
+                      currency: 'GTQ',
+                      currencyDisplay: 'narrowSymbol',
+                    }}
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <Label className="text-sm text-slate-700">Rango</Label>
+                      <Slider.Output className="text-xs tabular-nums text-slate-500">
+                        {({ state }) =>
+                          `${quetzales(formatearPrecio(state.values[0] ?? 0))} – ${quetzales(
+                            formatearPrecio(state.values[1] ?? PRECIO_TOPE),
+                          )}`
+                        }
+                      </Slider.Output>
+                    </div>
+                    <Slider.Track className="bg-slate-100">
+                      {({ state }) => (
+                        <>
+                          <Slider.Fill className="bg-slate-300/70" />
+                          {state.values.map((_, i) => (
+                            <Slider.Thumb key={i} index={i} className="sc-slider-thumb" />
+                          ))}
+                        </>
+                      )}
+                    </Slider.Track>
+                  </Slider>
+                </div>
               )}
 
               {tabFiltro === 'stock' && (
-                <div className="flex flex-wrap justify-center gap-2">
+                <div role="listbox" aria-label="Disponibilidad">
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={!filtros.soloDisponibles}
                     onClick={() => aplicar({ soloDisponibles: false })}
-                    className={`rounded-full px-4 py-2 text-sm transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
                       !filtros.soloDisponibles
                         ? 'bg-slate-900 text-white'
-                        : 'bg-slate-900/5 text-slate-600 hover:bg-slate-900/10'
+                        : 'text-slate-700 hover:bg-slate-900/5'
                     }`}
                   >
                     Todos
+                    {!filtros.soloDisponibles && <span aria-hidden>✓</span>}
                   </button>
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={!!filtros.soloDisponibles}
                     onClick={() => aplicar({ soloDisponibles: true })}
-                    className={`rounded-full px-4 py-2 text-sm transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
                       filtros.soloDisponibles
                         ? 'bg-slate-900 text-white'
-                        : 'bg-slate-900/5 text-slate-600 hover:bg-slate-900/10'
+                        : 'text-slate-700 hover:bg-slate-900/5'
                     }`}
                   >
                     Solo disponibles
+                    {filtros.soloDisponibles && <span aria-hidden>✓</span>}
                   </button>
                 </div>
               )}
@@ -395,34 +410,33 @@ export function Tienda() {
         {panel === 'orden' && (
           <div
             ref={flotanteRef}
-            role="dialog"
+            role="listbox"
             aria-label="Orden del catálogo"
-            className="sc-glass sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(16rem,calc(100vw-1.5rem))] rounded-[1.35rem] p-4 shadow-[0_22px_48px_rgb(15_23_42/0.14)]"
+            className="sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(12.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-900/10 bg-white p-1.5 shadow-[0_18px_40px_rgb(15_23_42/0.12)]"
           >
-            <Select
-              className="w-full"
-              selectedKey={filtros.orden}
-              onSelectionChange={(clave) => {
-                if (clave == null) return;
-                aplicar({ orden: String(clave) as OrdenCatalogo });
-              }}
-            >
-              <Label>Ordenar por</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  {(Object.keys(ordenEtiqueta) as OrdenCatalogo[]).map((orden) => (
-                    <ListBox.Item key={orden} id={orden} textValue={ordenEtiqueta[orden]}>
-                      {ordenEtiqueta[orden]}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
+            {(Object.keys(ordenEtiqueta) as OrdenCatalogo[]).map((orden) => {
+              const activo = filtros.orden === orden;
+              return (
+                <button
+                  key={orden}
+                  type="button"
+                  role="option"
+                  aria-selected={activo}
+                  onClick={() => {
+                    aplicar({ orden });
+                    setPanel(null);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
+                    activo
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-700 hover:bg-slate-900/5'
+                  }`}
+                >
+                  {ordenEtiqueta[orden]}
+                  {activo && <span aria-hidden>✓</span>}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

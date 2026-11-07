@@ -64,13 +64,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const salir = useCallback(async () => {
-    try {
-      await api.salir();
-    } catch {
-      /* sesión ya inválida */
-    }
+    // Limpia la UI de inmediato; la API no debe bloquear el cierre local.
+    const acceso = leerAcceso();
     borrarSesion();
     setUsuario(null);
+    if (!acceso) return;
+    try {
+      await api.salirConAcceso(acceso);
+    } catch {
+      /* sesión ya inválida en el servidor */
+    }
   }, []);
 
   const value = useMemo<AuthCtx>(

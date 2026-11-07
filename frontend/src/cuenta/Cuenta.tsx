@@ -1,9 +1,11 @@
 import { Button } from '@heroui/react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../autenticacion/AuthContexto';
 import { Panel } from '../compartido/ui/Panel';
 
 export function Cuenta() {
   const { usuario, salir } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <Panel strong className="mx-auto max-w-lg rounded-[1.75rem]">
@@ -19,7 +21,16 @@ export function Cuenta() {
           <dd className="font-medium text-slate-900">{usuario?.Rol}</dd>
         </div>
       </dl>
-      <Button className="mt-6" variant="secondary" onPress={() => void salir()}>
+      <Button
+        className="mt-6"
+        variant="secondary"
+        onPress={() => {
+          void (async () => {
+            await salir();
+            navigate('/tienda');
+          })();
+        }}
+      >
         Cerrar sesión
       </Button>
     </Panel>

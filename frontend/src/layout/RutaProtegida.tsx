@@ -10,7 +10,7 @@ export function RutaProtegida({ roles }: { roles?: string[] }) {
     return <Navigate to="/" replace />;
   }
   if (roles && !roles.includes(usuario.Rol)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/tienda" replace />;
   }
   return <Outlet />;
 }
