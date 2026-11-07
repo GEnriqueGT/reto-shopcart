@@ -8,6 +8,8 @@ import { Cuenta } from './cuenta/Cuenta';
 import { RutaProtegida } from './layout/RutaProtegida';
 import { Shell } from './layout/Shell';
 import { Operador } from './operador/Operador';
+import { Checkout } from './pago/Checkout';
+import { PedidoDetalle } from './pedidos/PedidoDetalle';
 import { Pedidos } from './pedidos/Pedidos';
 import { Reportes } from './reportes/Reportes';
 import { Servicios } from './servicios/Servicios';
@@ -29,7 +31,9 @@ export default function App() {
             <Route path="entrar" element={<Navigate to="/" replace />} />
             <Route element={<RutaProtegida />}>
               <Route path="cuenta" element={<Cuenta />} />
+              <Route path="pago" element={<Checkout />} />
               <Route path="pedidos" element={<Pedidos />} />
+              <Route path="pedidos/:idPedido" element={<PedidoDetalle />} />
             </Route>
             <Route element={<RutaProtegida roles={['Operador', 'Administrador']} />}>
               <Route path="operador" element={<Operador />} />

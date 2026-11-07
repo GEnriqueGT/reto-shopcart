@@ -101,7 +101,7 @@ export function Servicios() {
 function Chequeo({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolean }) {
   return (
     <div className="grid justify-items-center gap-2 text-center md:rounded-2xl md:bg-white/50 md:px-3 md:py-4">
-      <span className="sc-glass grid h-14 w-14 place-items-center rounded-full text-sm font-semibold text-slate-900 md:h-16 md:w-16">
+      <span className="sc-round-btn !h-14 !w-14 text-sm font-semibold text-slate-900 md:!h-16 md:!w-16">
         {titulo.slice(0, 1)}
       </span>
       <span className="text-xs font-medium text-slate-900 md:text-sm">{titulo}</span>

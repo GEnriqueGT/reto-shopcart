@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../autenticacion/AuthContexto';
 import { claveCarrito, consultarCarrito } from '../carrito/api';
@@ -168,32 +168,6 @@ function NavIcono({
   );
 }
 
-/** Ítem dentro de la barra compartida de secciones. */
-function NavBarraItem({
-  to,
-  label,
-  children,
-}: {
-  to: string;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <NavLink
-      to={to}
-      aria-label={label}
-      title={label}
-      className={({ isActive }) =>
-        `relative flex items-center justify-center rounded-full px-4 py-2.5 ${
-          isActive ? 'sc-nav-item-activo' : 'sc-nav-item'
-        }`
-      }
-    >
-      {children}
-    </NavLink>
-  );
-}
-
 function BarraSecciones({
   es,
   autenticado,
@@ -201,31 +175,87 @@ function BarraSecciones({
   es: (...roles: string[]) => boolean;
   autenticado: boolean;
 }) {
+  const { pathname } = useLocation();
+  const pistaRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [cristal, setCristal] = useState({ left: 0, width: 0, listo: false });
+
+  const items = useMemo(() => {
+    const lista: { to: string; label: string; nodo: React.ReactNode }[] = [
+      { to: '/tienda', label: 'Tienda', nodo: <IconoTienda /> },
+    ];
+    if (autenticado) {
+      lista.push({ to: '/pedidos', label: 'Pedidos', nodo: <IconoPedidos /> });
+    }
+    if (es('Operador', 'Administrador')) {
+      lista.push({ to: '/operador', label: 'Operador', nodo: <IconoOperador /> });
+    }
+    if (es('Administrador')) {
+      lista.push(
+        { to: '/admin', label: 'Admin', nodo: <IconoAdmin /> },
+        { to: '/reportes', label: 'Reportes', nodo: <IconoReportes /> },
+      );
+    }
+    return lista;
+  }, [autenticado, es]);
+
+  const activoIdx = items.findIndex(
+    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`),
+  );
+
+  useLayoutEffect(() => {
+    function medir() {
+      const pista = pistaRef.current;
+      const el = activoIdx >= 0 ? itemRefs.current[activoIdx] : null;
+      if (!pista || !el) {
+        setCristal((c) => ({ ...c, listo: false }));
+        return;
+      }
+      setCristal({
+        left: el.offsetLeft,
+        width: el.offsetWidth,
+        listo: true,
+      });
+    }
+
+    medir();
+    window.addEventListener('resize', medir);
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(medir) : null;
+    if (pistaRef.current) ro?.observe(pistaRef.current);
+    return () => {
+      window.removeEventListener('resize', medir);
+      ro?.disconnect();
+    };
+  }, [activoIdx, items]);
+
   return (
-    <div className="sc-nav flex items-center gap-1 rounded-full px-2 py-1.5">
-      <NavBarraItem to="/tienda" label="Tienda">
-        <IconoTienda />
-      </NavBarraItem>
-      {autenticado && (
-        <NavBarraItem to="/pedidos" label="Pedidos">
-          <IconoPedidos />
-        </NavBarraItem>
-      )}
-      {es('Operador', 'Administrador') && (
-        <NavBarraItem to="/operador" label="Operador">
-          <IconoOperador />
-        </NavBarraItem>
-      )}
-      {es('Administrador') && (
-        <NavBarraItem to="/admin" label="Admin">
-          <IconoAdmin />
-        </NavBarraItem>
-      )}
-      {es('Administrador') && (
-        <NavBarraItem to="/reportes" label="Reportes">
-          <IconoReportes />
-        </NavBarraItem>
-      )}
+    <div ref={pistaRef} className="sc-nav relative flex items-center gap-1 rounded-full px-2 py-1.5">
+      <span
+        aria-hidden
+        className={`sc-nav-cristal ${cristal.listo ? 'sc-nav-cristal-listo' : ''}`}
+        style={{
+          width: cristal.width,
+          transform: `translateX(${cristal.left}px)`,
+        }}
+      />
+      {items.map((item, i) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          aria-label={item.label}
+          title={item.label}
+          ref={(nodo) => {
+            itemRefs.current[i] = nodo;
+          }}
+          className={({ isActive }) =>
+            `sc-nav-item relative z-[1] flex items-center justify-center rounded-full px-4 py-2.5 ${
+              isActive ? 'sc-nav-item-activo' : ''
+            }`
+          }
+        >
+          {item.nodo}
+        </NavLink>
+      ))}
     </div>
   );
 }
@@ -289,7 +319,7 @@ export function Shell() {
       <header className="sc-shell flex shrink-0 flex-col gap-4 md:gap-5">
         <NavLink
           to="/tienda"
-          className="sc-marca block w-full text-center text-[1.65rem] leading-none md:text-[2.15rem]"
+          className="sc-marca block w-full text-center text-[1.85rem] leading-none md:text-[2.35rem]"
         >
           ShopCart
         </NavLink>
@@ -321,7 +351,7 @@ export function Shell() {
                       role="menu"
                       onMouseDown={(e) => e.stopPropagation()}
                       onTouchStart={(e) => e.stopPropagation()}
-                      className="sc-glass sc-flotante absolute right-12 top-[calc(100%+0.55rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] p-1.5 shadow-[0_22px_48px_rgb(15_23_42/0.14)]"
+                      className="sc-menu-flotante sc-menu-entrar sc-flotante absolute right-12 top-[calc(100%+0.55rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] p-1.5"
                     >
                       <Link
                         role="menuitem"

@@ -35,7 +35,7 @@ export function TarjetaProducto({ producto }: { producto: ProductoResumen }) {
   return (
     <Link
       to={`/tienda/${producto.IDProducto}`}
-      className="sc-glass block h-full overflow-hidden rounded-[1.5rem] transition hover:bg-white/90"
+      className="sc-card block h-full overflow-hidden rounded-[1.75rem]"
     >
       {mostrarImagen ? (
         <img

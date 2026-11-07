@@ -12,7 +12,7 @@ export function Estado({ cargando, vacio, error, vacioTexto = 'No hay datos.', c
   }
   if (error) {
     return (
-      <div className="sc-glass rounded-2xl px-4 py-6 text-center text-red-600 dark:text-red-300">
+      <div className="sc-card rounded-[1.5rem] px-4 py-6 text-center text-red-600">
         {error}
       </div>
     );

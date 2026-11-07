@@ -138,11 +138,7 @@ export function Producto() {
                           <button
                             type="button"
                             onClick={() => setIdVariante(v.IDVariante)}
-                            className={`flex w-full items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${
-                              activa
-                                ? 'border-slate-900/20 bg-white shadow-sm'
-                                : 'border-transparent bg-slate-900/[0.03] hover:bg-slate-900/[0.06]'
-                            }`}
+                            className={`sc-chip ${activa ? 'sc-chip-activo' : ''}`}
                           >
                             <span>
                               <span className="block text-sm font-semibold text-slate-900">{v.Sku}</span>

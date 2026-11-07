@@ -14,7 +14,7 @@ export function Entrar() {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  if (usuario) return <Navigate to="/cuenta" replace />;
+  if (usuario) return <Navigate to="/tienda" replace />;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +27,7 @@ export function Entrar() {
     setEnviando(true);
     try {
       await entrar(parseado.data.correo, parseado.data.contrasena);
-      navigate('/cuenta');
+      navigate('/tienda');
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {

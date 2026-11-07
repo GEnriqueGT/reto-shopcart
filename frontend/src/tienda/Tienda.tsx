@@ -1,6 +1,6 @@
 import { Label, Slider } from '@heroui/react';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
@@ -40,19 +40,19 @@ function IconoLupa() {
 
 function IconoFiltros() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
 function IconoOrden() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M8 5v14M8 5l-3 3M8 5l3 3M16 19V5M16 19l-3-3M16 19l3-3"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -98,6 +98,65 @@ function formatearPrecio(valor: number): string {
   return valor.toFixed(2);
 }
 
+function ListaConCristal({
+  opciones,
+  valor,
+  onElegir,
+  'aria-label': ariaLabel,
+}: {
+  opciones: { id: string; etiqueta: string }[];
+  valor: string;
+  onElegir: (id: string) => void;
+  'aria-label': string;
+}) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [cristal, setCristal] = useState({ top: 0, height: 0, listo: false });
+  const idx = opciones.findIndex((o) => o.id === valor);
+
+  useLayoutEffect(() => {
+    function medir() {
+      const el = idx >= 0 ? refs.current[idx] : null;
+      if (!el) {
+        setCristal((c) => ({ ...c, listo: false }));
+        return;
+      }
+      setCristal({ top: el.offsetTop, height: el.offsetHeight, listo: true });
+    }
+    medir();
+    window.addEventListener('resize', medir);
+    return () => window.removeEventListener('resize', medir);
+  }, [idx, opciones]);
+
+  return (
+    <div className="sc-menu-lista" role="listbox" aria-label={ariaLabel}>
+      <span
+        aria-hidden
+        className={`sc-menu-cristal ${cristal.listo ? 'sc-menu-cristal-listo' : ''}`}
+        style={{ height: cristal.height, transform: `translateY(${cristal.top}px)` }}
+      />
+      {opciones.map((op, i) => {
+        const activo = op.id === valor;
+        return (
+          <button
+            key={op.id}
+            ref={(n) => {
+              refs.current[i] = n;
+            }}
+            type="button"
+            role="option"
+            aria-selected={activo}
+            onClick={() => onElegir(op.id)}
+            className={`sc-menu-item ${activo ? 'sc-menu-item-activo' : ''}`}
+          >
+            {op.etiqueta}
+            {activo && <span aria-hidden>✓</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function Tienda() {
   const [searchParams, setSearchParams] = useSearchParams();
   const filtros = useMemo(() => filtrosDesdeBusqueda(searchParams), [searchParams]);
@@ -112,6 +171,12 @@ export function Tienda() {
   const omitirRango = useRef(false);
   const flotanteRef = useRef<HTMLDivElement>(null);
   const botonesRef = useRef<HTMLDivElement>(null);
+  const btnFiltrosRef = useRef<HTMLButtonElement>(null);
+  const btnOrdenRef = useRef<HTMLButtonElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const tabsPistaRef = useRef<HTMLDivElement>(null);
+  const [cristalToolbar, setCristalToolbar] = useState({ left: 0, width: 0, listo: false });
+  const [cristalTabs, setCristalTabs] = useState({ left: 0, width: 0, listo: false });
 
   useEffect(() => {
     setTexto(filtros.texto ?? '');
@@ -159,7 +224,6 @@ export function Tienda() {
       if (evento.key === 'Escape') setPanel(null);
     }
 
-    // Evita que el mismo click que abre el panel lo cierre al registrar el listener.
     const id = window.setTimeout(() => {
       document.addEventListener('mousedown', alPointer);
       document.addEventListener('touchstart', alPointer);
@@ -172,6 +236,38 @@ export function Tienda() {
       document.removeEventListener('keydown', alTecla);
     };
   }, [panel]);
+
+  useLayoutEffect(() => {
+    function medir() {
+      const pista = botonesRef.current;
+      const el = panel === 'filtros' ? btnFiltrosRef.current : panel === 'orden' ? btnOrdenRef.current : null;
+      if (!pista || !el) {
+        setCristalToolbar((c) => ({ ...c, listo: false }));
+        return;
+      }
+      setCristalToolbar({ left: el.offsetLeft, width: el.offsetWidth, listo: true });
+    }
+    medir();
+    window.addEventListener('resize', medir);
+    return () => window.removeEventListener('resize', medir);
+  }, [panel]);
+
+  useLayoutEffect(() => {
+    if (panel !== 'filtros') return;
+    function medir() {
+      const idx = tabsFiltro.findIndex((t) => t.id === tabFiltro);
+      const pista = tabsPistaRef.current;
+      const el = idx >= 0 ? tabRefs.current[idx] : null;
+      if (!pista || !el) {
+        setCristalTabs((c) => ({ ...c, listo: false }));
+        return;
+      }
+      setCristalTabs({ left: el.offsetLeft, width: el.offsetWidth, listo: true });
+    }
+    medir();
+    window.addEventListener('resize', medir);
+    return () => window.removeEventListener('resize', medir);
+  }, [panel, tabFiltro]);
 
   const categorias = useQuery({
     queryKey: ['catalogo', 'categorias'],
@@ -231,26 +327,42 @@ export function Tienda() {
               />
             </label>
 
-            <div ref={botonesRef} className="flex shrink-0 items-center gap-2.5">
+            <div
+              ref={botonesRef}
+              className="sc-nav relative flex shrink-0 items-center gap-1 rounded-full px-1.5 py-1.5"
+            >
+              <span
+                aria-hidden
+                className={`sc-nav-cristal ${cristalToolbar.listo ? 'sc-nav-cristal-listo' : ''}`}
+                style={{
+                  width: cristalToolbar.width,
+                  transform: `translateX(${cristalToolbar.left}px)`,
+                }}
+              />
               <button
+                ref={btnFiltrosRef}
                 type="button"
                 aria-label="Filtros"
                 aria-expanded={panel === 'filtros'}
                 aria-pressed={panel === 'filtros'}
                 onClick={() => alternarPanel('filtros')}
-                className={`sc-round-btn relative ${panel === 'filtros' ? 'sc-round-btn-activo' : ''}`}
+                className={`sc-nav-item relative z-[1] flex items-center justify-center rounded-full px-3.5 py-2.5 ${
+                  panel === 'filtros' ? 'sc-nav-item-activo' : ''
+                }`}
               >
                 <IconoFiltros />
                 {filtrosActivos && <span className="sc-round-dot" aria-hidden />}
               </button>
-
               <button
+                ref={btnOrdenRef}
                 type="button"
                 aria-label="Ordenar"
                 aria-expanded={panel === 'orden'}
                 aria-pressed={panel === 'orden'}
                 onClick={() => alternarPanel('orden')}
-                className={`sc-round-btn relative ${panel === 'orden' ? 'sc-round-btn-activo' : ''}`}
+                className={`sc-nav-item relative z-[1] flex items-center justify-center rounded-full px-3.5 py-2.5 ${
+                  panel === 'orden' ? 'sc-nav-item-activo' : ''
+                }`}
               >
                 <IconoOrden />
                 {ordenActivo && <span className="sc-round-dot" aria-hidden />}
@@ -264,22 +376,36 @@ export function Tienda() {
             ref={flotanteRef}
             role="dialog"
             aria-label="Filtros del catálogo"
-            className="sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-900/10 bg-white p-1.5 shadow-[0_18px_40px_rgb(15_23_42/0.12)]"
+            className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-1.5"
           >
-            <div className="flex gap-0.5 p-0.5" role="tablist" aria-label="Tipo de filtro">
-              {tabsFiltro.map((tab) => {
+            <div
+              ref={tabsPistaRef}
+              className="relative flex gap-0.5 p-0.5"
+              role="tablist"
+              aria-label="Tipo de filtro"
+            >
+              <span
+                aria-hidden
+                className={`sc-nav-cristal ${cristalTabs.listo ? 'sc-nav-cristal-listo' : ''}`}
+                style={{
+                  width: cristalTabs.width,
+                  transform: `translateX(${cristalTabs.left}px)`,
+                }}
+              />
+              {tabsFiltro.map((tab, i) => {
                 const activo = tabFiltro === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    ref={(n) => {
+                      tabRefs.current[i] = n;
+                    }}
                     type="button"
                     role="tab"
                     aria-selected={activo}
                     onClick={() => setTabFiltro(tab.id)}
-                    className={`flex-1 rounded-xl px-2 py-2 text-xs font-medium transition ${
-                      activo
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-500 hover:bg-slate-900/5 hover:text-slate-800'
+                    className={`sc-nav-item relative z-[1] flex-1 rounded-full px-2 py-2 text-xs font-medium ${
+                      activo ? 'sc-nav-item-activo' : ''
                     }`}
                   >
                     {tab.etiqueta}
@@ -288,44 +414,22 @@ export function Tienda() {
               })}
             </div>
 
-            <div className="mt-1 max-h-64 overflow-y-auto">
+            <div key={tabFiltro} className="sc-menu-contenido mt-1 max-h-64 overflow-y-auto">
               {tabFiltro === 'categoria' && (
-                <div role="listbox" aria-label="Categoría">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={!filtros.idCategoria}
-                    onClick={() => aplicar({ idCategoria: undefined })}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                      !filtros.idCategoria
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-700 hover:bg-slate-900/5'
-                    }`}
-                  >
-                    Todas
-                    {!filtros.idCategoria && <span aria-hidden>✓</span>}
-                  </button>
-                  {(categorias.data ?? []).map((cat) => {
-                    const activo = filtros.idCategoria === cat.IDCategoria;
-                    return (
-                      <button
-                        key={cat.IDCategoria}
-                        type="button"
-                        role="option"
-                        aria-selected={activo}
-                        onClick={() => aplicar({ idCategoria: cat.IDCategoria })}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                          activo
-                            ? 'bg-slate-900 text-white'
-                            : 'text-slate-700 hover:bg-slate-900/5'
-                        }`}
-                      >
-                        {cat.Nombre}
-                        {activo && <span aria-hidden>✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
+                <ListaConCristal
+                  aria-label="Categoría"
+                  valor={filtros.idCategoria ? String(filtros.idCategoria) : 'todas'}
+                  onElegir={(id) =>
+                    aplicar({ idCategoria: id === 'todas' ? undefined : Number(id) })
+                  }
+                  opciones={[
+                    { id: 'todas', etiqueta: 'Todas' },
+                    ...(categorias.data ?? []).map((cat) => ({
+                      id: String(cat.IDCategoria),
+                      etiqueta: cat.Nombre,
+                    })),
+                  ]}
+                />
               )}
 
               {tabFiltro === 'precio' && (
@@ -372,36 +476,15 @@ export function Tienda() {
               )}
 
               {tabFiltro === 'stock' && (
-                <div role="listbox" aria-label="Disponibilidad">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={!filtros.soloDisponibles}
-                    onClick={() => aplicar({ soloDisponibles: false })}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                      !filtros.soloDisponibles
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-700 hover:bg-slate-900/5'
-                    }`}
-                  >
-                    Todos
-                    {!filtros.soloDisponibles && <span aria-hidden>✓</span>}
-                  </button>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={!!filtros.soloDisponibles}
-                    onClick={() => aplicar({ soloDisponibles: true })}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                      filtros.soloDisponibles
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-700 hover:bg-slate-900/5'
-                    }`}
-                  >
-                    Solo disponibles
-                    {filtros.soloDisponibles && <span aria-hidden>✓</span>}
-                  </button>
-                </div>
+                <ListaConCristal
+                  aria-label="Disponibilidad"
+                  valor={filtros.soloDisponibles ? 'disponibles' : 'todos'}
+                  onElegir={(id) => aplicar({ soloDisponibles: id === 'disponibles' })}
+                  opciones={[
+                    { id: 'todos', etiqueta: 'Todos' },
+                    { id: 'disponibles', etiqueta: 'Solo disponibles' },
+                  ]}
+                />
               )}
             </div>
           </div>
@@ -410,33 +493,21 @@ export function Tienda() {
         {panel === 'orden' && (
           <div
             ref={flotanteRef}
-            role="listbox"
             aria-label="Orden del catálogo"
-            className="sc-flotante absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(12.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-900/10 bg-white p-1.5 shadow-[0_18px_40px_rgb(15_23_42/0.12)]"
+            className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(12.5rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-1.5"
           >
-            {(Object.keys(ordenEtiqueta) as OrdenCatalogo[]).map((orden) => {
-              const activo = filtros.orden === orden;
-              return (
-                <button
-                  key={orden}
-                  type="button"
-                  role="option"
-                  aria-selected={activo}
-                  onClick={() => {
-                    aplicar({ orden });
-                    setPanel(null);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                    activo
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-700 hover:bg-slate-900/5'
-                  }`}
-                >
-                  {ordenEtiqueta[orden]}
-                  {activo && <span aria-hidden>✓</span>}
-                </button>
-              );
-            })}
+            <ListaConCristal
+              aria-label="Orden del catálogo"
+              valor={filtros.orden}
+              onElegir={(id) => {
+                aplicar({ orden: id as OrdenCatalogo });
+                setPanel(null);
+              }}
+              opciones={(Object.keys(ordenEtiqueta) as OrdenCatalogo[]).map((orden) => ({
+                id: orden,
+                etiqueta: ordenEtiqueta[orden],
+              }))}
+            />
           </div>
         )}
       </div>
