@@ -1,4 +1,5 @@
 import { pedirJson } from '../compartido/http/cliente';
+import type { EstadoTransicion } from './estado';
 import type { ConsultaGestion, FiltrosPedidos, PaginaPedidos } from './tipos';
 
 export const clavePedidos = ['pedidos'] as const;
@@ -29,4 +30,19 @@ export function consultarPedido(idPedido: number) {
 
 export function cancelarPedido(idPedido: number) {
   return pedirJson<ConsultaGestion>(`/pedidos/${idPedido}/cancelar`, { metodo: 'POST' });
+}
+
+export function transicionarPedido(idPedido: number, estado: EstadoTransicion) {
+  return pedirJson<ConsultaGestion>(`/pedidos/${idPedido}/transicionar`, {
+    cuerpo: { estado },
+  });
+}
+
+export function devolverPedido(
+  idPedido: number,
+  lineas: { idDetallePedido: number; cantidad: number }[],
+) {
+  return pedirJson<ConsultaGestion>(`/pedidos/${idPedido}/devoluciones`, {
+    cuerpo: { lineas },
+  });
 }
