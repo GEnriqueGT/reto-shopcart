@@ -110,7 +110,7 @@ pnpm --dir backend dev
 
 ## Frontend
 
-React + TypeScript + Vite + HeroUI v3 + Tailwind CSS v4, con estética glass. Con Docker, el front sale en el mismo `compose up` (puerto 5173). Para desarrollar con HMR en el host (Node 24 + Corepack / pnpm del monorepo), con la API en el 3000:
+React + TypeScript + Vite + HeroUI v3 + Tailwind CSS v4 + TanStack Query + Zod + Recharts. UI blanca flotante (nav/buscador/tarjetas con sombra ligera; botones primarios azul plano `#93c5fd`). Con Docker, el front sale en el mismo `compose up` (puerto 5173). Para desarrollar con HMR en el host (Node 24 + Corepack / pnpm del monorepo), con la API en el 3000:
 
 ```bash
 corepack enable
@@ -118,9 +118,27 @@ pnpm install
 pnpm --dir frontend dev
 ```
 
-Abre [http://localhost:5173](http://localhost:5173). El home consulta `GET /health`. Por defecto las peticiones van a `/api` (proxy de Vite en dev; nginx en Docker). Si quieres llamar la API directo, copia `frontend/.env.example` a `frontend/.env` y fija `VITE_API_URL`.
+Abre [http://localhost:5173](http://localhost:5173). El login está en `/`; tras entrar o registrarte aterrizas en `/tienda`. La salud de API/SQL/Redis está en `/servicios`. Por defecto las peticiones van a `/api` (proxy de Vite en dev; nginx en Docker). Si quieres llamar la API directo, copia `frontend/.env.example` a `frontend/.env` y fija `VITE_API_URL`.
 
-Antes de cerrar cada fase del front: `pnpm audit` sin avisos abiertos. Los overrides del workspace (p. ej. `minimatch`) cierran hallazgos de la cadena de suministro.
+Sesión en el navegador: access Bearer en memoria; refresh en `sessionStorage`; fusión del carrito invitado (`Carrito-Token` en `localStorage`) al entrar. El cliente HTTP reintenta una vez tras `401` con `POST /autenticacion/refrescar`.
+
+### Pantallas por rol
+
+| Ruta | Quién | Qué hace |
+| --- | --- | --- |
+| `/`, `/registro` | Público | Entrar / registrar |
+| `/tienda`, `/tienda/:id` | Público | Catálogo con filtros/orden/paginación en servidor y detalle de variante |
+| `/carrito` | Público / sesión | Ítems, cupón, ir a pagar |
+| `/pago` | Cliente+ | Direcciones, envío, iniciar/cobrar con llave UUID |
+| `/pedidos`, `/pedidos/:id` | Sesión | Listado, detalle, cancelar; operador/admin también transiciona y devuelve |
+| `/operador` | Operador / Admin | Inventario (existencia, kardex, movimientos) y cola de pedidos |
+| `/admin` | Admin | CRUD categorías, productos/variantes/imágenes, cupones y usuarios |
+| `/reportes` | Admin | Gráficas (ventas, categorías, top), pedidos, carritos abandonados y bitácora |
+| `/cuenta`, `/servicios` | Sesión / todos | Cuenta y salud del sistema |
+
+La barra de secciones muestra Tienda (todos), Pedidos (con sesión), Operador (Operador/Admin), Admin y Reportes (Admin). En móvil va fija abajo.
+
+Antes de cerrar cada fase del front: `pnpm audit` sin avisos abiertos. Los overrides del workspace (p. ej. `minimatch`) cierran hallazgos de la cadena de suministro. La guía oral de defensa (backend + frontend) está fuera del repo en `Defensa-ShopCart.pdf` del escritorio.
 
 ## Credenciales de prueba
 
