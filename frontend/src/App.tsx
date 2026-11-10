@@ -1,13 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 import { Admin } from './admin/Admin';
-import { AuthProvider } from './autenticacion/AuthContexto';
+import { AuthProvider, useAuth } from './autenticacion/AuthContexto';
 import { Entrar } from './autenticacion/Entrar';
 import { Registro } from './autenticacion/Registro';
 import { Bitacora } from './bitacora/Bitacora';
 import { Carrito } from './carrito/Carrito';
 import { Cuenta } from './cuenta/Cuenta';
 import { ModoVistaProvider } from './layout/ModoVista';
-import { RutaProtegida } from './layout/RutaProtegida';
+import { RutaCliente, RutaProtegida } from './layout/RutaProtegida';
+import { rutaInicio } from './layout/rutas';
 import { Shell } from './layout/Shell';
 import { Cola } from './operador/Cola';
 import { Operador } from './operador/Operador';
@@ -26,6 +27,11 @@ function RedirectBitacoraAntigua() {
   return <Reportes />;
 }
 
+function RedireccionPorDefecto() {
+  const { usuario } = useAuth();
+  return <Navigate to={rutaInicio(usuario?.Rol)} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -36,15 +42,19 @@ export default function App() {
               <Route index element={<Entrar />} />
               <Route path="registro" element={<Registro />} />
               <Route path="servicios" element={<Servicios />} />
-              <Route path="tienda" element={<Tienda />} />
-              <Route path="tienda/:idProducto" element={<Producto />} />
-              <Route path="carrito" element={<Carrito />} />
               <Route path="entrar" element={<Navigate to="/" replace />} />
+              <Route element={<RutaCliente />}>
+                <Route path="tienda" element={<Tienda />} />
+                <Route path="tienda/:idProducto" element={<Producto />} />
+                <Route path="carrito" element={<Carrito />} />
+                <Route element={<RutaProtegida />}>
+                  <Route path="pago" element={<Checkout />} />
+                  <Route path="pedidos" element={<Pedidos />} />
+                  <Route path="pedidos/:idPedido" element={<Navigate to="/pedidos" replace />} />
+                </Route>
+              </Route>
               <Route element={<RutaProtegida />}>
                 <Route path="cuenta" element={<Cuenta />} />
-                <Route path="pago" element={<Checkout />} />
-                <Route path="pedidos" element={<Pedidos />} />
-                <Route path="pedidos/:idPedido" element={<Navigate to="/pedidos" replace />} />
               </Route>
               <Route element={<RutaProtegida roles={['Operador', 'Administrador']} />}>
                 <Route path="inventario" element={<Operador />} />
@@ -58,7 +68,7 @@ export default function App() {
                 <Route path="reportes" element={<RedirectBitacoraAntigua />} />
                 <Route path="bitacora" element={<Bitacora />} />
               </Route>
-              <Route path="*" element={<Navigate to="/tienda" replace />} />
+              <Route path="*" element={<RedireccionPorDefecto />} />
             </Route>
           </Routes>
         </ModoVistaProvider>

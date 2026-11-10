@@ -52,3 +52,11 @@ export async function carritosAbandonados(datos: Pagina, minutos: number): Promi
   ]);
   return grupos(resultado);
 }
+
+export async function carritoAbandonado(idCarrito: number, minutos: number): Promise<unknown[][]> {
+  const resultado = await ejecutarProcedimiento('SP_Reportes_CarritoAbandonado', [
+    { nombre: 'IDCarrito', tipo: sql.Int(), valor: idCarrito },
+    { nombre: 'Minutos', tipo: sql.Int(), valor: minutos },
+  ]);
+  return grupos(resultado);
+}

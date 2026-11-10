@@ -137,7 +137,7 @@ Sesión en el navegador: access Bearer en memoria; refresh en `sessionStorage`; 
 | `/bitacora` | Admin | Historial inmutable de acciones |
 | `/cuenta`, `/servicios` | Sesión / todos | Cuenta y salud del sistema |
 
-La barra depende del interruptor de vista (Operador/Admin): **Vista de cliente** = Tienda/Pedidos/Carrito; **Vista de admin** = Productos (Inventario/Cupones/Categorías), Información (Pedidos usuarios/Reportes/Bitácora) y Usuarios; **Vista de operador** = Inventario/Pedidos usuarios. En móvil va fija abajo.
+La barra sigue el rol: **Cliente** (e invitados) = Tienda/Pedidos/Carrito; **Administrador** = Productos (Inventario/Cupones/Categorías), Información (Pedidos usuarios/Reportes/Bitácora) y Usuarios; **Operador** = Inventario/Pedidos usuarios. Operador y Administrador no usan la tienda ni el carrito: tras entrar van a Inventario. En móvil la barra va fija abajo.
 
 Antes de cerrar cada fase del front: `pnpm audit` sin avisos abiertos. Los overrides del workspace (p. ej. `minimatch`) cierran hallazgos de la cadena de suministro. La guía oral de defensa (backend + frontend) está fuera del repo en `Defensa-ShopCart.pdf` del escritorio.
 

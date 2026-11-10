@@ -83,3 +83,28 @@ export const esquemaPaginaCarritos = z
   .strict();
 
 export type PaginaCarritos = z.output<typeof esquemaPaginaCarritos>;
+
+export const esquemaItemCarritoAbandonado = z
+  .object({
+    IDItemCarrito: z.number().int().positive(),
+    IDCarrito: z.number().int().positive(),
+    IDVariante: z.number().int().positive(),
+    Cantidad: z.number().int().positive(),
+    Sku: z.string().min(1).max(40),
+    Nombre: z.string().min(1).max(160),
+    Precio: dinero,
+    Importe: dinero,
+    ImagenUrl: z.string().min(1).max(500).nullable(),
+  })
+  .strict();
+
+export type ItemCarritoAbandonado = z.output<typeof esquemaItemCarritoAbandonado>;
+
+export const esquemaConsultaCarritoAbandonado = z
+  .object({
+    carrito: esquemaCarritoAbandonado,
+    items: z.array(esquemaItemCarritoAbandonado),
+  })
+  .strict();
+
+export type ConsultaCarritoAbandonado = z.output<typeof esquemaConsultaCarritoAbandonado>;

@@ -8,8 +8,8 @@ import type { Usuario } from './tipos';
 type AuthCtx = {
   usuario: Usuario | null;
   cargando: boolean;
-  entrar: (correo: string, contrasena: string) => Promise<void>;
-  registrar: (correo: string, contrasena: string) => Promise<void>;
+  entrar: (correo: string, contrasena: string) => Promise<Usuario>;
+  registrar: (correo: string, contrasena: string) => Promise<Usuario>;
   salir: () => Promise<void>;
   es: (...roles: string[]) => boolean;
 };
@@ -52,13 +52,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* carrito de invitado puede no existir */
       }
     }
-    setUsuario(await api.yo());
+    const yo = await api.yo();
+    setUsuario(yo);
+    return yo;
   }, []);
 
   const registrar = useCallback(
     async (correo: string, contrasena: string) => {
       await api.registrar(correo, contrasena);
-      await entrar(correo, contrasena);
+      return entrar(correo, contrasena);
     },
     [entrar],
   );

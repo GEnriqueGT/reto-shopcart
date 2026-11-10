@@ -6,7 +6,6 @@ import { quetzales } from '../compartido/dinero';
 import { mensajeDeError } from '../compartido/errores';
 import { MiniImagen } from '../compartido/ui/MiniImagen';
 import { ModalConfirmacion } from '../compartido/ui/ModalConfirmacion';
-import { useModoVista } from '../layout/ModoVista';
 import { cobrarPago } from '../pago/api';
 import * as api from './api';
 import {
@@ -43,8 +42,7 @@ export function ModalPedido({
   onCerrar: () => void;
 }) {
   const { es } = useAuth();
-  const { modo } = useModoVista();
-  const operativo = es('Operador', 'Administrador') && modo === 'operador';
+  const operativo = es('Operador', 'Administrador');
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<TabPedido>('detalle');
   const [errorAccion, setErrorAccion] = useState<string | null>(null);

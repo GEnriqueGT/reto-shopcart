@@ -18,6 +18,7 @@ export function rutasReportes(): Router {
   router.get('/reportes/mas-vendidos', ...tablero, controlador.masVendidos);
   router.get('/reportes/pedidos', ...tablero, controlador.pedidos);
   router.get('/reportes/carritos-abandonados', ...tablero, controlador.carritosAbandonados);
+  router.get('/reportes/carritos-abandonados/:idCarrito', ...tablero, controlador.carritoAbandonado);
 
   return router;
 }

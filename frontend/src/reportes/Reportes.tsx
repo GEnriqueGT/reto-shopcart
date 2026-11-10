@@ -23,6 +23,7 @@ import { PaginacionPedidos } from '../pedidos/PaginacionPedidos';
 import * as api from './api';
 import { claveReportes } from './api';
 import { aIso, etiquetaPeriodo, formatearCorto } from './fechas';
+import { ModalCarritoAbandonado } from './ModalCarritoAbandonado';
 import type { PeriodoVentas, RangoFechas } from './tipos';
 
 type Vista = 'ventas' | 'categorias' | 'top' | 'pedidos' | 'carritos';
@@ -31,7 +32,7 @@ const vistas: { id: Vista; etiqueta: string }[] = [
   { id: 'ventas', etiqueta: 'Ventas' },
   { id: 'categorias', etiqueta: 'Categorías' },
   { id: 'top', etiqueta: 'Más vendidos' },
-  { id: 'pedidos', etiqueta: 'Pedidos' },
+  { id: 'pedidos', etiqueta: 'Pedidos pagados' },
   { id: 'carritos', etiqueta: 'Carritos' },
 ];
 
@@ -261,10 +262,10 @@ function PanelPedidos({ rango }: { rango: RangoFechas }) {
 
   return (
     <div className={panel}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-medium text-slate-900">Pedidos pagados</p>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <select
           className="sc-select-cuadro w-auto"
+          aria-label="Estado del pedido"
           value={estado}
           onChange={(e) => {
             setEstado(e.target.value);
@@ -317,15 +318,15 @@ function PanelPedidos({ rango }: { rango: RangoFechas }) {
 
 function PanelCarritos() {
   const [pagina, setPagina] = useState(1);
+  const [idCarrito, setIdCarrito] = useState<number | null>(null);
   const consulta = useQuery({
     queryKey: [...claveReportes, 'carritos', pagina],
     queryFn: () => api.carritosAbandonados(pagina),
   });
 
   return (
-    <div className={panel}>
-      <p className="text-sm font-medium text-slate-900">Carritos abandonados</p>
-      <div className="mt-4">
+    <>
+      <div className={panel}>
         <Estado
           cargando={consulta.isLoading}
           error={consulta.isError ? mensajeDeError(consulta.error) : null}
@@ -334,18 +335,21 @@ function PanelCarritos() {
         >
           <ul className="grid gap-3">
             {(consulta.data?.carritos ?? []).map((c) => (
-              <li
-                key={c.IDCarrito}
-                className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--sc-line)] pb-3 last:border-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium text-slate-900">Carrito #{c.IDCarrito}</p>
-                  <p className="sc-muted text-xs">
-                    {c.Invitado ? 'Invitado' : `Usuario ${c.IDUsuario}`} · {c.Items} ítems ·{' '}
-                    {formatearCorto(c.ActualizadoEn)}
-                  </p>
-                </div>
-                <p className="font-semibold">{quetzales(c.Total)}</p>
+              <li key={c.IDCarrito}>
+                <button
+                  type="button"
+                  className="flex w-full flex-wrap items-start justify-between gap-3 border-b border-[var(--sc-line)] pb-3 text-left last:border-0 last:pb-0"
+                  onClick={() => setIdCarrito(c.IDCarrito)}
+                >
+                  <div>
+                    <p className="font-medium text-slate-900">Carrito #{c.IDCarrito}</p>
+                    <p className="sc-muted text-xs">
+                      {c.Invitado ? 'Invitado' : `Usuario ${c.IDUsuario}`} · {c.Items} ítems ·{' '}
+                      {formatearCorto(c.ActualizadoEn)}
+                    </p>
+                  </div>
+                  <p className="font-semibold">{quetzales(c.Total)}</p>
+                </button>
               </li>
             ))}
           </ul>
@@ -357,7 +361,12 @@ function PanelCarritos() {
           />
         </Estado>
       </div>
-    </div>
+      <ModalCarritoAbandonado
+        idCarrito={idCarrito}
+        abierto={idCarrito !== null}
+        onCerrar={() => setIdCarrito(null)}
+      />
+    </>
   );
 }
 

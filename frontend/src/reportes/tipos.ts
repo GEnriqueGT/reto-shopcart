@@ -53,6 +53,23 @@ export type PaginaCarritos = {
   total: number;
 };
 
+export type ItemCarritoAbandonado = {
+  IDItemCarrito: number;
+  IDCarrito: number;
+  IDVariante: number;
+  Cantidad: number;
+  Sku: string;
+  Nombre: string;
+  Precio: string;
+  Importe: string;
+  ImagenUrl: string | null;
+};
+
+export type ConsultaCarritoAbandonado = {
+  carrito: CarritoAbandonado;
+  items: ItemCarritoAbandonado[];
+};
+
 export type ModuloBitacora = 'Catalogo' | 'Inventario' | 'Cupones' | 'Pedidos';
 
 export type EntradaBitacora = {

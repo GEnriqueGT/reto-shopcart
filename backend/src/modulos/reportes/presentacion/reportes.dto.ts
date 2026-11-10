@@ -34,6 +34,12 @@ export const dtoConsultarPedidos = z
   .strict()
   .refine(fechasValidas, rangoInvalido);
 
+export const dtoIdCarrito = z
+  .object({
+    idCarrito: z.coerce.number().int().positive(),
+  })
+  .strict();
+
 export type Rango = z.output<typeof dtoRango>;
 export type Ventas = z.output<typeof dtoVentas>;
 export type ConsultarPedidos = z.output<typeof dtoConsultarPedidos>;

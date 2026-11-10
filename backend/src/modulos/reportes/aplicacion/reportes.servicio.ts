@@ -2,13 +2,17 @@ import { z, type ZodType } from 'zod';
 import { leerEntorno } from '../../../configuracion/entorno.js';
 import type { Pagina } from '../../../compartido/dto/comun.dto.js';
 import { centavos } from '../../carrito/dominio/centavos.js';
+import { leer } from '../../../compartido/base-de-datos/leer.js';
 import {
   esquemaCarritoAbandonado,
+  esquemaConsultaCarritoAbandonado,
+  esquemaItemCarritoAbandonado,
   esquemaMasVendido,
   esquemaPaginaCarritos,
   esquemaPaginaPedidos,
   esquemaVentaCategoria,
   esquemaVentaPeriodo,
+  type ConsultaCarritoAbandonado,
   type MasVendido,
   type PaginaCarritos,
   type PaginaPedidos,
@@ -19,7 +23,7 @@ import type { ConsultarPedidos, Rango, Ventas } from '../presentacion/reportes.d
 import { guardarReporte, leerReporte } from '../infraestructura/reportes.cache.js';
 import * as repositorio from '../infraestructura/reportes.repositorio.js';
 
-const montos = ['Monto', 'Subtotal', 'Descuento', 'CostoEnvio', 'ImporteDevuelto', 'Total'] as const;
+const montos = ['Monto', 'Subtotal', 'Descuento', 'CostoEnvio', 'ImporteDevuelto', 'Total', 'Precio', 'Importe'] as const;
 
 function preparar(fila: unknown): unknown {
   if (fila === null || typeof fila !== 'object') {
@@ -96,4 +100,18 @@ export function carritosAbandonados(datos: Pagina): Promise<PaginaCarritos> {
       }),
     ),
   );
+}
+
+export async function carritoAbandonado(idCarrito: number): Promise<ConsultaCarritoAbandonado> {
+  const minutos = leerEntorno().CARRITO_ABANDONADO_MINUTOS;
+  const grupos = await repositorio.carritoAbandonado(idCarrito, minutos);
+  return esquemaConsultaCarritoAbandonado.parse({
+    carrito: leer(
+      esquemaCarritoAbandonado,
+      (grupos[0] ?? []).map((fila) => preparar(fila)),
+      'CARRITO_NO_ENCONTRADO',
+      'El carrito abandonado no existe.',
+    ),
+    items: z.array(esquemaItemCarritoAbandonado).parse((grupos[1] ?? []).map((fila) => preparar(fila))),
+  });
 }

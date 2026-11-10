@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { mensajeDeError } from '../compartido/errores';
 import { Panel } from '../compartido/ui/Panel';
+import { rutaInicio } from '../layout/rutas';
 import { useAuth } from './AuthContexto';
 import { esquemaCredenciales } from './esquema';
 
@@ -14,7 +15,7 @@ export function Entrar() {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  if (usuario) return <Navigate to="/tienda" replace />;
+  if (usuario) return <Navigate to={rutaInicio(usuario.Rol)} replace />;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,8 +27,8 @@ export function Entrar() {
     }
     setEnviando(true);
     try {
-      await entrar(parseado.data.correo, parseado.data.contrasena);
-      navigate('/tienda');
+      const yo = await entrar(parseado.data.correo, parseado.data.contrasena);
+      navigate(rutaInicio(yo.Rol));
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {

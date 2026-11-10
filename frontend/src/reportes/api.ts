@@ -1,5 +1,6 @@
 import { pedirJson } from '../compartido/http/cliente';
 import type {
+  ConsultaCarritoAbandonado,
   MasVendido,
   ModuloBitacora,
   PaginaBitacora,
@@ -51,6 +52,14 @@ export function pedidosReporte(
 export function carritosAbandonados(pagina: number) {
   const q = new URLSearchParams({ pagina: String(pagina), tamano: '10' });
   return pedirJson<PaginaCarritos>(`/reportes/carritos-abandonados?${q}`);
+}
+
+export function carritoAbandonado(idCarrito: number) {
+  return pedirJson<ConsultaCarritoAbandonado>(`/reportes/carritos-abandonados/${idCarrito}`);
+}
+
+export function claveCarritoAbandonado(idCarrito: number) {
+  return [...claveReportes, 'carrito', idCarrito] as const;
 }
 
 export function bitacora(pagina: number, rango: RangoFechas, modulo?: ModuloBitacora) {

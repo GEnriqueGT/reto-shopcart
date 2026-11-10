@@ -185,6 +185,47 @@ registro.registerPath({
   },
 });
 
+const itemCarrito = z
+  .object({
+    IDItemCarrito: z.number().int(),
+    IDCarrito: z.number().int(),
+    IDVariante: z.number().int(),
+    Cantidad: z.number().int(),
+    Sku: z.string(),
+    Nombre: z.string(),
+    Precio: z.string(),
+    Importe: z.string(),
+    ImagenUrl: z.string().nullable(),
+  })
+  .openapi('ItemCarritoAbandonado');
+
+const consultaCarrito = z
+  .object({
+    carrito,
+    items: z.array(itemCarrito),
+  })
+  .openapi('ConsultaCarritoAbandonado');
+
+const parametroCarrito = z
+  .object({
+    idCarrito: z.coerce.number().int().positive(),
+  })
+  .openapi('ParametroCarritoAbandonado');
+
+registro.registerPath({
+  method: 'get',
+  path: '/reportes/carritos-abandonados/{idCarrito}',
+  tags: tag,
+  summary: 'Detalle de un carrito abandonado',
+  security: acceso,
+  request: { params: parametroCarrito },
+  responses: {
+    200: json(consultaCarrito, 'El carrito y sus ítems'),
+    404: json(error, 'El carrito abandonado no existe'),
+    ...denegado,
+  },
+});
+
 function json(schema: z.ZodType, description: string) {
   return { description, content: { 'application/json': { schema } } };
 }

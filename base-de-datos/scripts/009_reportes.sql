@@ -257,9 +257,63 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE SP_Reportes_CarritoAbandonado
+  @IDCarrito INT,
+  @Minutos INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF @Minutos < 1
+    THROW 50400, 'MINUTOS_INVALIDOS|Los minutos no son válidos.', 1;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM Carrito c
+    WHERE c.IDCarrito = @IDCarrito
+      AND c.ActualizadoEn <= DATEADD(MINUTE, -@Minutos, SYSUTCDATETIME())
+      AND EXISTS (SELECT 1 FROM ItemCarrito i WHERE i.IDCarrito = c.IDCarrito)
+  )
+    THROW 50404, 'CARRITO_NO_ENCONTRADO|El carrito abandonado no existe.', 1;
+
+  SELECT
+    c.IDCarrito,
+    c.IDUsuario,
+    CASE WHEN c.IDUsuario IS NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Invitado,
+    c.Subtotal,
+    c.Descuento,
+    c.Total,
+    c.ActualizadoEn,
+    (SELECT COUNT(*) FROM ItemCarrito i WHERE i.IDCarrito = c.IDCarrito) AS Items
+  FROM Carrito c
+  WHERE c.IDCarrito = @IDCarrito;
+
+  SELECT
+    i.IDItemCarrito,
+    i.IDCarrito,
+    i.IDVariante,
+    i.Cantidad,
+    v.Sku,
+    p.Nombre,
+    v.Precio,
+    CAST(ROUND(v.Precio * i.Cantidad, 2) AS DECIMAL(18, 2)) AS Importe,
+    (
+      SELECT TOP (1) img.Url
+      FROM ImagenProducto img
+      WHERE img.IDProducto = p.IDProducto
+      ORDER BY img.Orden, img.IDImagenProducto
+    ) AS ImagenUrl
+  FROM ItemCarrito i
+  JOIN Variante v ON v.IDVariante = i.IDVariante
+  JOIN Producto p ON p.IDProducto = v.IDProducto
+  WHERE i.IDCarrito = @IDCarrito
+  ORDER BY i.IDItemCarrito;
+END
+GO
+
 GRANT EXECUTE ON SP_Reportes_Ventas TO shopcart_app;
 GRANT EXECUTE ON SP_Reportes_Categorias TO shopcart_app;
 GRANT EXECUTE ON SP_Reportes_MasVendidos TO shopcart_app;
 GRANT EXECUTE ON SP_Reportes_Pedidos TO shopcart_app;
 GRANT EXECUTE ON SP_Reportes_CarritosAbandonados TO shopcart_app;
+GRANT EXECUTE ON SP_Reportes_CarritoAbandonado TO shopcart_app;
 GO

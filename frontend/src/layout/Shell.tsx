@@ -53,95 +53,6 @@ function IconoSalir() {
   );
 }
 
-function etiquetaVistaTrabajo(es: (...roles: string[]) => boolean) {
-  return es('Administrador') ? 'Vista de admin' : 'Vista de operador';
-}
-
-function InterruptorVerComo({
-  modo,
-  onCambiar,
-  es,
-}: {
-  modo: ModoVista;
-  onCambiar: (siguiente: ModoVista) => void;
-  es: (...roles: string[]) => boolean;
-}) {
-  const [abierto, setAbierto] = useState(false);
-  const anclaRef = useRef<HTMLDivElement>(null);
-  const etiquetaTrabajo = etiquetaVistaTrabajo(es);
-  const etiqueta = modo === 'operador' ? etiquetaTrabajo : 'Vista de cliente';
-
-  useEffect(() => {
-    if (!abierto) return;
-    function alPointer(evento: MouseEvent | TouchEvent) {
-      if (!anclaRef.current?.contains(evento.target as Node)) setAbierto(false);
-    }
-    function alTecla(evento: KeyboardEvent) {
-      if (evento.key === 'Escape') setAbierto(false);
-    }
-    document.addEventListener('mousedown', alPointer);
-    document.addEventListener('touchstart', alPointer);
-    document.addEventListener('keydown', alTecla);
-    return () => {
-      document.removeEventListener('mousedown', alPointer);
-      document.removeEventListener('touchstart', alPointer);
-      document.removeEventListener('keydown', alTecla);
-    };
-  }, [abierto]);
-
-  function elegir(siguiente: ModoVista) {
-    setAbierto(false);
-    if (siguiente !== modo) onCambiar(siguiente);
-  }
-
-  return (
-    <div ref={anclaRef} className="sc-ver-como relative">
-      <button
-        type="button"
-        aria-label="Cambiar vista"
-        aria-haspopup="listbox"
-        aria-expanded={abierto}
-        className={`sc-ver-como-trigger ${abierto ? 'sc-ver-como-trigger-abierto' : ''}`}
-        onClick={() => setAbierto((v) => !v)}
-      >
-        <span>{etiqueta}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path
-            d="M6 9l6 6 6-6"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      {abierto && (
-        <div
-          role="listbox"
-          aria-label="Modo de vista"
-          className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.45rem)] z-50 min-w-[11.5rem] overflow-hidden rounded-[0.15rem] p-1"
-        >
-          {(['cliente', 'operador'] as const).map((opcion) => {
-            const activa = opcion === modo;
-            return (
-              <button
-                key={opcion}
-                type="button"
-                role="option"
-                aria-selected={activa}
-                className={`sc-ver-como-opcion ${activa ? 'sc-ver-como-opcion-activa' : ''}`}
-                onClick={() => elegir(opcion)}
-              >
-                {opcion === 'cliente' ? 'Vista de cliente' : etiquetaTrabajo}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
 type EnlaceNav = { to: string; label: string; end?: boolean };
 type ItemNav =
   | ({ tipo: 'enlace' } & EnlaceNav)
@@ -316,7 +227,7 @@ function BarraSecciones({
 
 export function Shell() {
   const { usuario, cargando, salir, es } = useAuth();
-  const { modo, puedeCambiar, setModo } = useModoVista();
+  const { modo } = useModoVista();
   const location = useLocation();
   const { pathname } = location;
   const navigate = useNavigate();
@@ -412,10 +323,6 @@ export function Shell() {
               />
 
               <div className="ml-auto flex items-center gap-2 md:gap-3">
-                {puedeCambiar && (
-                  <InterruptorVerComo modo={modo} onCambiar={setModo} es={es} />
-                )}
-
                 {usuario ? (
                   <>
                     <button
