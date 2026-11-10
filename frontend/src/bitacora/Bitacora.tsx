@@ -169,7 +169,6 @@ function ModalBitacora({
   if (!entrada) return null;
 
   const ruta = rutaDetalleBitacora(entrada);
-  const recurso = etiquetaRecurso(entrada);
   const nombre = tituloEntrada(entrada);
   const filas = filasDetalle(entrada);
   const esProducto = Boolean(entrada.IDProducto);
@@ -179,16 +178,14 @@ function ModalBitacora({
       {esProducto && (
         <MiniImagen url={entrada.ImagenUrl} alt={nombre} className="sc-bitacora-foto" />
       )}
-      <p className="mt-3 text-center text-sm font-medium text-slate-900">{nombre}</p>
-      {entrada.Descripcion ? (
+      <p className={`${esProducto ? 'mt-3' : ''} text-center text-xs font-medium text-slate-900`}>
+        {nombre}
+      </p>
+      {esProducto && entrada.Descripcion ? (
         <p className="sc-muted mt-2 max-w-[16rem] text-center text-xs leading-relaxed">
           {entrada.Descripcion}
         </p>
-      ) : (
-        <p className="sc-muted mt-2 text-center text-xs uppercase tracking-[0.14em]">
-          {etiquetaBitacora(entrada.Entidad)} #{entrada.IDEntidad}
-        </p>
-      )}
+      ) : null}
     </div>
   );
 
@@ -221,7 +218,6 @@ function ModalBitacora({
               </section>
 
               <section className="sc-modal-bitacora-lado">
-                <p className="sc-muted text-xs font-medium uppercase tracking-[0.14em]">{recurso}</p>
                 <div className="sc-modal-bitacora-recurso-wrap">
                   {ruta ? (
                     <Link to={ruta} className="sc-modal-bitacora-enlace" onClick={onCerrar}>
@@ -282,11 +278,11 @@ export function Bitacora() {
       <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">Bitácora</h1>
       <p className="sc-listado-pista">Clickea para ver el detalle</p>
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <label className="grid gap-1.5 text-sm">
+      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+        <label className="grid w-full gap-1.5 text-sm lg:w-auto">
           <span className="sc-muted">Desde</span>
           <input
-            className="sc-input sc-input-cuadro"
+            className="sc-input sc-input-cuadro w-full"
             type="datetime-local"
             value={desdeLocal}
             onChange={(e) => {
@@ -295,10 +291,10 @@ export function Bitacora() {
             }}
           />
         </label>
-        <label className="grid gap-1.5 text-sm">
+        <label className="grid w-full gap-1.5 text-sm lg:w-auto">
           <span className="sc-muted">Hasta</span>
           <input
-            className="sc-input sc-input-cuadro"
+            className="sc-input sc-input-cuadro w-full"
             type="datetime-local"
             value={hastaLocal}
             onChange={(e) => {
@@ -307,10 +303,10 @@ export function Bitacora() {
             }}
           />
         </label>
-        <label className="grid gap-1.5 text-sm">
+        <label className="grid w-full gap-1.5 text-sm lg:w-auto">
           <span className="sc-muted">Módulo</span>
           <select
-            className="sc-select-cuadro"
+            className="sc-select-cuadro w-full"
             value={modulo}
             onChange={(e) => {
               setModulo(e.target.value as ModuloBitacora | '');
@@ -327,7 +323,7 @@ export function Bitacora() {
         {(desdeLocal || hastaLocal) && (
           <button
             type="button"
-            className="sc-input sc-input-cuadro px-4"
+            className="sc-input sc-input-cuadro w-full px-4 lg:w-auto"
             onClick={() => {
               setDesdeLocal('');
               setHastaLocal('');

@@ -26,8 +26,8 @@ export function ModalConfirmacion({
         if (!open) onCerrar();
       }}
     >
-      <Modal.Container>
-        <Modal.Dialog className="sc-modal-cuadro sm:max-w-md">
+      <Modal.Container placement="center">
+        <Modal.Dialog className="sc-modal-cuadro sc-modal-compacto sm:max-w-md">
           <Modal.CloseTrigger />
           <Modal.Header>
             <Modal.Heading>{titulo}</Modal.Heading>

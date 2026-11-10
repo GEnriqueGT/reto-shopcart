@@ -187,7 +187,7 @@ function ModalCupon({
 
               <fieldset className="grid gap-1.5">
                 <legend className="sc-muted text-sm">Tipo</legend>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex w-full gap-2">
                   {(['Porcentaje', 'Monto'] as const).map((t) => (
                     <button
                       key={t}
@@ -200,7 +200,7 @@ function ModalCupon({
                           monto: t === 'Monto' ? f.monto ?? '25.00' : null,
                         }))
                       }
-                      className={forma.tipo === t ? 'sc-seg sc-seg-activo' : 'sc-seg'}
+                      className={`flex-1 ${forma.tipo === t ? 'sc-seg sc-seg-activo' : 'sc-seg'}`}
                     >
                       {t}
                     </button>
@@ -264,7 +264,7 @@ function ModalCupon({
 
               <fieldset className="grid gap-1.5">
                 <legend className="sc-muted text-sm">Alcance</legend>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex w-full gap-2">
                   {(['Carrito', 'Categoria'] as const).map((a) => (
                     <button
                       key={a}
@@ -279,7 +279,7 @@ function ModalCupon({
                               : null,
                         }))
                       }
-                      className={forma.alcance === a ? 'sc-seg sc-seg-activo' : 'sc-seg'}
+                      className={`flex-1 ${forma.alcance === a ? 'sc-seg sc-seg-activo' : 'sc-seg'}`}
                     >
                       {a === 'Categoria' ? 'Categoría' : a}
                     </button>

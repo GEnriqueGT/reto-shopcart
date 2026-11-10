@@ -2,16 +2,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
+import { IconoUsuario } from '../compartido/ui/IconoUsuario';
 import * as api from './api';
 import { claveAdmin } from './api';
 import type { UsuarioAdmin } from './tipos';
 import {
-  claseCuadricula,
   ModalDetalle,
   PaginacionAdmin,
   TarjetaAdmin,
   useAviso,
 } from './ui';
+
+const cuadriculaUsuarios =
+  'grid grid-cols-1 gap-x-3 gap-y-8 sm:grid-cols-2 md:gap-x-4 md:gap-y-10 lg:grid-cols-3';
 
 export function PanelUsuarios() {
   const queryClient = useQueryClient();
@@ -52,13 +55,14 @@ export function PanelUsuarios() {
         vacio={!consulta.isLoading && usuarios.length === 0}
         vacioTexto="Aún no hay usuarios."
       >
-        <ul className={claseCuadricula}>
+        <ul className={cuadriculaUsuarios}>
           {usuarios.map((u) => (
             <li key={u.IDUsuario}>
               <TarjetaAdmin
                 titulo={u.Correo}
                 meta={`${u.Activo ? 'Activo' : 'Inactivo'} · ${u.Rol}`}
                 activo={u.Activo}
+                icono={<IconoUsuario tamano={56} />}
                 onAbrir={() => setViendo(u)}
                 acciones={[
                   { etiqueta: 'Detalle', onPress: () => setViendo(u) },

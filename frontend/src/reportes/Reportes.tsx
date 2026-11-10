@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Bar,
@@ -32,7 +32,7 @@ const vistas: { id: Vista; etiqueta: string }[] = [
   { id: 'ventas', etiqueta: 'Ventas' },
   { id: 'categorias', etiqueta: 'Categorías' },
   { id: 'top', etiqueta: 'Más vendidos' },
-  { id: 'pedidos', etiqueta: 'Pedidos pagados' },
+  { id: 'pedidos', etiqueta: 'Lista de pedidos' },
   { id: 'carritos', etiqueta: 'Carritos' },
 ];
 
@@ -43,12 +43,94 @@ const periodos: { id: PeriodoVentas; etiqueta: string }[] = [
   { id: 'Mes', etiqueta: 'Mes' },
 ];
 
-const panel = 'border border-[var(--sc-line)] p-5';
+const panel = 'border border-[var(--sc-line)] p-3 lg:p-5';
 
 function vistaDesde(params: URLSearchParams): Vista {
   const raw = params.get('vista');
   if (vistas.some((v) => v.id === raw)) return raw as Vista;
   return 'ventas';
+}
+
+function SelectorVistaMovil({
+  vista,
+  onCambiar,
+}: {
+  vista: Vista;
+  onCambiar: (siguiente: Vista) => void;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const anclaRef = useRef<HTMLDivElement>(null);
+  const etiqueta = vistas.find((v) => v.id === vista)?.etiqueta ?? 'Ventas';
+
+  useEffect(() => {
+    if (!abierto) return;
+    function alPointer(evento: MouseEvent | TouchEvent) {
+      if (!anclaRef.current?.contains(evento.target as Node)) setAbierto(false);
+    }
+    function alTecla(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') setAbierto(false);
+    }
+    document.addEventListener('mousedown', alPointer);
+    document.addEventListener('touchstart', alPointer);
+    document.addEventListener('keydown', alTecla);
+    return () => {
+      document.removeEventListener('mousedown', alPointer);
+      document.removeEventListener('touchstart', alPointer);
+      document.removeEventListener('keydown', alTecla);
+    };
+  }, [abierto]);
+
+  return (
+    <div ref={anclaRef} className="sc-reportes-vista-movil relative">
+      <button
+        type="button"
+        aria-expanded={abierto}
+        aria-haspopup="listbox"
+        aria-label="Vista de reportes"
+        onClick={() => setAbierto((v) => !v)}
+        className={`sc-nav inline-flex w-full items-center justify-between gap-2 rounded-[0.15rem] px-3 py-2.5 text-sm ${
+          abierto ? 'sc-round-btn-activo' : ''
+        }`}
+      >
+        <span className="font-medium text-slate-900">{etiqueta}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {abierto && (
+        <div
+          role="listbox"
+          aria-label="Vistas de reportes"
+          className="sc-menu-flotante sc-menu-entrar absolute left-0 top-[calc(100%+0.65rem)] z-50 w-full overflow-hidden rounded-[0.15rem] p-1.5"
+        >
+          {vistas.map((opcion) => {
+            const activa = opcion.id === vista;
+            return (
+              <button
+                key={opcion.id}
+                type="button"
+                role="option"
+                aria-selected={activa}
+                className={`sc-menu-item ${activa ? 'sc-menu-item-activo' : ''}`}
+                onClick={() => {
+                  onCambiar(opcion.id);
+                  setAbierto(false);
+                }}
+              >
+                {opcion.etiqueta}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function FiltroRango({
@@ -65,20 +147,20 @@ function FiltroRango({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-end gap-3">
-      <label className="grid gap-1 text-sm">
+    <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+      <label className="grid w-full gap-1 text-sm lg:w-auto">
         <span className="sc-muted">Desde</span>
         <input
-          className="sc-input sc-input-cuadro"
+          className="sc-input sc-input-cuadro w-full"
           type="datetime-local"
           value={desdeLocal}
           onChange={(e) => onDesde(e.target.value)}
         />
       </label>
-      <label className="grid gap-1 text-sm">
+      <label className="grid w-full gap-1 text-sm lg:w-auto">
         <span className="sc-muted">Hasta</span>
         <input
-          className="sc-input sc-input-cuadro"
+          className="sc-input sc-input-cuadro w-full"
           type="datetime-local"
           value={hastaLocal}
           onChange={(e) => onHasta(e.target.value)}
@@ -108,22 +190,24 @@ function PanelVentas({ rango }: { rango: RangoFechas }) {
 
   return (
     <div className={panel}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-medium text-slate-900">Ventas por periodo</p>
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
+        <p className="text-center text-sm font-medium text-slate-900 lg:text-left">
+          Ventas por periodo
+        </p>
+        <div className="flex w-full flex-wrap justify-center gap-2 lg:w-auto lg:justify-end">
           {periodos.map((p) => (
             <button
               key={p.id}
               type="button"
               onClick={() => setPeriodo(p.id)}
-              className={periodo === p.id ? 'sc-seg-cuadro sc-seg-cuadro-activo' : 'sc-seg-cuadro'}
+              className={`flex-1 lg:flex-none ${periodo === p.id ? 'sc-seg-cuadro sc-seg-cuadro-activo' : 'sc-seg-cuadro'}`}
             >
               {p.etiqueta}
             </button>
           ))}
         </div>
       </div>
-      <div className="mt-4 h-72">
+      <div className="-mx-1 mt-4 h-72 sm:mx-0">
         <Estado
           cargando={consulta.isLoading}
           error={consulta.isError ? mensajeDeError(consulta.error) : null}
@@ -131,10 +215,10 @@ function PanelVentas({ rango }: { rango: RangoFechas }) {
           vacioTexto="Sin ventas en el rango."
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={datos}>
+            <LineChart data={datos} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(15 23 42 / 0.08)" />
               <XAxis dataKey="etiqueta" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} width={40} />
               <Tooltip
                 formatter={(valor, nombre) =>
                   nombre === 'monto' ? quetzales(Number(valor).toFixed(2)) : String(valor)
@@ -394,7 +478,13 @@ export function Reportes() {
     <div className="pb-4">
       <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">Reportes</h1>
 
-      <div className="sc-tabs-inventario mt-5" role="tablist" aria-label="Vistas de reportes">
+      <SelectorVistaMovil vista={vista} onCambiar={setVista} />
+
+      <div
+        className="sc-tabs-inventario sc-reportes-tabs-escritorio mt-5"
+        role="tablist"
+        aria-label="Vistas de reportes"
+      >
         {vistas.map((v) => {
           const activa = vista === v.id;
           return (

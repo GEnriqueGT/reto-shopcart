@@ -411,13 +411,13 @@ export function Checkout() {
 
                   <div className="grid gap-1.5">
                     <dt className="sc-muted">Pago</dt>
-                    <dd className="flex flex-wrap gap-2">
+                    <dd className="flex flex-col gap-2">
                       <button
                         type="button"
                         className={
                           formaPago === 'efectivo'
-                            ? 'sc-seg-cuadro sc-seg-cuadro-activo'
-                            : 'sc-seg-cuadro'
+                            ? 'sc-seg-cuadro sc-seg-cuadro-activo w-full'
+                            : 'sc-seg-cuadro w-full'
                         }
                         onClick={() => setFormaPago('efectivo')}
                       >
@@ -427,8 +427,8 @@ export function Checkout() {
                         type="button"
                         className={
                           formaPago === 'tarjeta'
-                            ? 'sc-seg-cuadro sc-seg-cuadro-activo inline-flex items-center gap-2'
-                            : 'sc-seg-cuadro inline-flex items-center gap-2'
+                            ? 'sc-seg-cuadro sc-seg-cuadro-activo inline-flex w-full items-center justify-center gap-2'
+                            : 'sc-seg-cuadro inline-flex w-full items-center justify-center gap-2'
                         }
                         onClick={() => setFormaPago('tarjeta')}
                       >

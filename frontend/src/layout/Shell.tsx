@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../autenticacion/AuthContexto';
 import { claveCarrito, consultarCarrito } from '../carrito/api';
 import { Desplazamiento } from '../compartido/ui/Desplazamiento';
+import { IconoUsuario } from '../compartido/ui/IconoUsuario';
 import { EstadoPie } from '../servicios/EstadoPie';
 import { useModoVista, type ModoVista } from './ModoVista';
 
@@ -25,20 +26,6 @@ function IconoCarrito() {
   );
 }
 
-function IconoUsuario() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="9" r="3.35" stroke="currentColor" strokeWidth={trazo} />
-      <path
-        d="M5.5 19.25c1.4-2.8 3.7-4.25 6.5-4.25s5.1 1.45 6.5 4.25"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function IconoSalir() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -48,6 +35,32 @@ function IconoSalir() {
         strokeWidth={trazo}
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconoMenu() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconoCerrar() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        stroke="currentColor"
+        strokeWidth={trazo}
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -63,15 +76,50 @@ function rutaActiva(pathname: string, to: string, end?: boolean) {
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
-function SubmenuSeccion({
-  label,
-  hijos,
-  abrirArriba = false,
-}: {
-  label: string;
-  hijos: EnlaceNav[];
-  abrirArriba?: boolean;
-}) {
+function itemsDeSeccion(
+  es: (...roles: string[]) => boolean,
+  autenticado: boolean,
+  modo: ModoVista,
+): ItemNav[] {
+  if (modo === 'operador' && es('Operador', 'Administrador')) {
+    if (es('Administrador')) {
+      return [
+        {
+          tipo: 'submenu',
+          label: 'Productos',
+          hijos: [
+            { to: '/inventario', label: 'Inventario', end: true },
+            { to: '/admin/cupones', label: 'Cupones' },
+            { to: '/admin/categorias', label: 'Categorías' },
+          ],
+        },
+        {
+          tipo: 'submenu',
+          label: 'Información',
+          hijos: [
+            { to: '/inventario/cola', label: 'Pedidos usuarios' },
+            { to: '/reportes', label: 'Reportes' },
+            { to: '/bitacora', label: 'Bitácora' },
+          ],
+        },
+        { tipo: 'enlace', to: '/admin/usuarios', label: 'Usuarios' },
+      ];
+    }
+
+    return [
+      { tipo: 'enlace', to: '/inventario', label: 'Inventario', end: true },
+      { tipo: 'enlace', to: '/inventario/cola', label: 'Pedidos usuarios' },
+    ];
+  }
+
+  const lista: ItemNav[] = [{ tipo: 'enlace', to: '/tienda', label: 'Tienda' }];
+  if (autenticado) {
+    lista.push({ tipo: 'enlace', to: '/pedidos', label: 'Pedidos' });
+  }
+  return lista;
+}
+
+function SubmenuSeccion({ label, hijos }: { label: string; hijos: EnlaceNav[] }) {
   const { pathname } = useLocation();
   const [abierto, setAbierto] = useState(false);
   const anclaRef = useRef<HTMLDivElement>(null);
@@ -123,9 +171,7 @@ function SubmenuSeccion({
         <div
           role="menu"
           aria-label={label}
-          className={`sc-menu-flotante sc-menu-entrar absolute left-0 z-50 min-w-[10.5rem] overflow-hidden rounded-[0.15rem] p-1 ${
-            abrirArriba ? 'bottom-[calc(100%+0.4rem)]' : 'top-[calc(100%+0.4rem)]'
-          }`}
+          className="sc-menu-flotante sc-menu-entrar absolute left-0 top-[calc(100%+0.4rem)] z-50 min-w-[10.5rem] overflow-hidden rounded-[0.15rem] p-1"
         >
           {hijos.map((hijo) => {
             const hijoActivo = rutaActiva(pathname, hijo.to, hijo.end);
@@ -149,67 +195,17 @@ function SubmenuSeccion({
 }
 
 function BarraSecciones({
-  es,
-  autenticado,
-  modo,
+  items,
   className = '',
-  abrirArriba = false,
 }: {
-  es: (...roles: string[]) => boolean;
-  autenticado: boolean;
-  modo: ModoVista;
+  items: ItemNav[];
   className?: string;
-  abrirArriba?: boolean;
 }) {
-  const items = useMemo((): ItemNav[] => {
-    if (modo === 'operador' && es('Operador', 'Administrador')) {
-      if (es('Administrador')) {
-        return [
-          {
-            tipo: 'submenu',
-            label: 'Productos',
-            hijos: [
-              { to: '/inventario', label: 'Inventario', end: true },
-              { to: '/admin/cupones', label: 'Cupones' },
-              { to: '/admin/categorias', label: 'Categorías' },
-            ],
-          },
-          {
-            tipo: 'submenu',
-            label: 'Información',
-            hijos: [
-              { to: '/inventario/cola', label: 'Pedidos usuarios' },
-              { to: '/reportes', label: 'Reportes' },
-              { to: '/bitacora', label: 'Bitácora' },
-            ],
-          },
-          { tipo: 'enlace', to: '/admin/usuarios', label: 'Usuarios' },
-        ];
-      }
-
-      return [
-        { tipo: 'enlace', to: '/inventario', label: 'Inventario', end: true },
-        { tipo: 'enlace', to: '/inventario/cola', label: 'Pedidos usuarios' },
-      ];
-    }
-
-    const lista: ItemNav[] = [{ tipo: 'enlace', to: '/tienda', label: 'Tienda' }];
-    if (autenticado) {
-      lista.push({ tipo: 'enlace', to: '/pedidos', label: 'Pedidos' });
-    }
-    return lista;
-  }, [autenticado, es, modo]);
-
   return (
     <nav className={`sc-nav ${className}`} aria-label="Secciones">
       {items.map((item) =>
         item.tipo === 'submenu' ? (
-          <SubmenuSeccion
-            key={item.label}
-            label={item.label}
-            hijos={item.hijos}
-            abrirArriba={abrirArriba}
-          />
+          <SubmenuSeccion key={item.label} label={item.label} hijos={item.hijos} />
         ) : (
           <NavLink
             key={item.to}
@@ -225,6 +221,123 @@ function BarraSecciones({
   );
 }
 
+function MenuLateral({
+  abierto,
+  onCerrar,
+  items,
+  usuario,
+  cargando,
+  onSalir,
+}: {
+  abierto: boolean;
+  onCerrar: () => void;
+  items: ItemNav[];
+  usuario: { Correo: string } | null;
+  cargando: boolean;
+  onSalir: () => void;
+}) {
+  const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!abierto) return;
+    function alTecla(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') onCerrar();
+    }
+    document.addEventListener('keydown', alTecla);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', alTecla);
+      document.body.style.overflow = prev;
+    };
+  }, [abierto, onCerrar]);
+
+  if (!abierto) return null;
+
+  return (
+    <div className="sc-menu-lateral" role="presentation">
+      <button
+        type="button"
+        className="sc-menu-lateral-fondo"
+        aria-label="Cerrar menú"
+        onClick={onCerrar}
+      />
+      <aside
+        ref={panelRef}
+        className="sc-menu-lateral-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú"
+      >
+        <div className="sc-menu-lateral-cabecera">
+          <p className="text-sm font-semibold text-slate-900">Menú</p>
+          <button
+            type="button"
+            className="sc-round-btn"
+            aria-label="Cerrar menú"
+            onClick={onCerrar}
+          >
+            <IconoCerrar />
+          </button>
+        </div>
+
+        <nav className="sc-menu-lateral-nav" aria-label="Secciones">
+          {items.map((item) =>
+            item.tipo === 'submenu' ? (
+              <div key={item.label} className="sc-menu-lateral-grupo">
+                <p className="sc-menu-lateral-grupo-titulo">{item.label}</p>
+                {item.hijos.map((hijo) => (
+                  <NavLink
+                    key={hijo.to}
+                    to={hijo.to}
+                    end={hijo.end}
+                    onClick={onCerrar}
+                    className={({ isActive }) =>
+                      `sc-menu-lateral-enlace ${isActive ? 'sc-menu-lateral-enlace-activo' : ''}`
+                    }
+                  >
+                    {hijo.label}
+                  </NavLink>
+                ))}
+              </div>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={onCerrar}
+                className={({ isActive }) =>
+                  `sc-menu-lateral-enlace ${isActive ? 'sc-menu-lateral-enlace-activo' : ''}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ),
+          )}
+        </nav>
+
+        <div className="sc-menu-lateral-cuenta">
+          {usuario ? (
+            <>
+              <Link to="/cuenta" onClick={onCerrar} className="sc-menu-lateral-enlace">
+                {cargando ? '…' : usuario.Correo}
+              </Link>
+              <button type="button" className="sc-menu-lateral-salir" onClick={onSalir}>
+                <IconoSalir />
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <Link to="/" onClick={onCerrar} className="sc-menu-lateral-enlace">
+              Entrar
+            </Link>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
 export function Shell() {
   const { usuario, cargando, salir, es } = useAuth();
   const { modo } = useModoVista();
@@ -232,11 +345,17 @@ export function Shell() {
   const { pathname } = location;
   const navigate = useNavigate();
   const enAuth = !usuario && (pathname === '/' || pathname === '/registro');
-  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [menuCuentaAbierto, setMenuCuentaAbierto] = useState(false);
+  const [drawerAbierto, setDrawerAbierto] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const botonUsuarioRef = useRef<HTMLButtonElement>(null);
   const verCarrito = !enAuth && modo === 'cliente';
+
+  const items = useMemo(
+    () => itemsDeSeccion(es, !!usuario, modo),
+    [es, usuario, modo],
+  );
 
   const carrito = useQuery({
     queryKey: claveCarrito,
@@ -246,7 +365,8 @@ export function Shell() {
   const piezas = carrito.data?.items.reduce((suma, item) => suma + item.Cantidad, 0) ?? 0;
 
   useEffect(() => {
-    setMenuAbierto(false);
+    setMenuCuentaAbierto(false);
+    setDrawerAbierto(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -263,18 +383,18 @@ export function Shell() {
   }, [aviso]);
 
   useEffect(() => {
-    if (!menuAbierto) return;
+    if (!menuCuentaAbierto) return;
 
     function alPointer(evento: MouseEvent | TouchEvent) {
       const nodo = evento.target as Node | null;
       if (!nodo) return;
       if (menuRef.current?.contains(nodo)) return;
       if (botonUsuarioRef.current?.contains(nodo)) return;
-      setMenuAbierto(false);
+      setMenuCuentaAbierto(false);
     }
 
     function alTecla(evento: KeyboardEvent) {
-      if (evento.key === 'Escape') setMenuAbierto(false);
+      if (evento.key === 'Escape') setMenuCuentaAbierto(false);
     }
 
     const id = window.setTimeout(() => {
@@ -288,14 +408,115 @@ export function Shell() {
       document.removeEventListener('touchstart', alPointer);
       document.removeEventListener('keydown', alTecla);
     };
-  }, [menuAbierto]);
+  }, [menuCuentaAbierto]);
+
+  async function cerrarSesion() {
+    setMenuCuentaAbierto(false);
+    setDrawerAbierto(false);
+    await salir();
+    navigate('/tienda', { state: { aviso: 'Sesión cerrada correctamente' } });
+  }
+
+  const botonCarrito = verCarrito ? (
+    <NavLink
+      to="/carrito"
+      aria-label="Carrito"
+      title="Carrito"
+      className={({ isActive }) =>
+        `sc-round-btn relative ${isActive ? 'sc-round-btn-activo' : ''}`
+      }
+    >
+      <IconoCarrito />
+      {piezas > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-slate-900 px-1 text-[10px] font-semibold leading-4 text-white">
+          {piezas > 99 ? '99+' : piezas}
+        </span>
+      )}
+    </NavLink>
+  ) : null;
+
+  const accionesEscritorio = (
+    <>
+      {usuario ? (
+        <>
+          <button
+            ref={botonUsuarioRef}
+            type="button"
+            aria-label="Cuenta"
+            aria-expanded={menuCuentaAbierto}
+            title="Cuenta"
+            onClick={() => setMenuCuentaAbierto((v) => !v)}
+            className={`sc-round-btn ${menuCuentaAbierto ? 'sc-round-btn-activo' : ''}`}
+          >
+            {cargando ? <span className="text-xs">…</span> : <IconoUsuario />}
+          </button>
+
+          {menuCuentaAbierto && (
+            <div
+              ref={menuRef}
+              role="menu"
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="sc-menu-flotante sc-menu-entrar sc-flotante absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-xl p-1.5"
+            >
+              <Link
+                role="menuitem"
+                to="/cuenta"
+                onClick={() => setMenuCuentaAbierto(false)}
+                className="block truncate rounded-lg px-3 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+              >
+                {usuario.Correo}
+              </Link>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => void cerrarSesion()}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                <IconoSalir />
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <NavLink
+          to="/"
+          aria-label="Entrar"
+          title="Entrar"
+          className={({ isActive }) =>
+            `sc-round-btn ${isActive ? 'sc-round-btn-activo' : ''}`
+          }
+        >
+          <IconoUsuario />
+        </NavLink>
+      )}
+      {botonCarrito}
+    </>
+  );
+
+  const accionesMovil = (
+    <>
+      {botonCarrito}
+      <button
+        type="button"
+        aria-label="Abrir menú"
+        aria-expanded={drawerAbierto}
+        title="Menú"
+        className={`sc-round-btn ${drawerAbierto ? 'sc-round-btn-activo' : ''}`}
+        onClick={() => setDrawerAbierto(true)}
+      >
+        <IconoMenu />
+      </button>
+    </>
+  );
 
   return (
     <div
       className={
         enAuth
           ? 'relative flex h-dvh flex-col overflow-hidden'
-          : 'relative flex min-h-dvh flex-col pb-16 md:pb-0'
+          : 'relative flex min-h-dvh flex-col'
       }
     >
       <header className="sc-header sticky top-0 z-30">
@@ -303,106 +524,40 @@ export function Shell() {
           className={
             enAuth
               ? 'sc-shell flex items-center justify-center py-4'
-              : 'sc-shell relative flex items-center gap-4 py-3.5 md:gap-8 md:py-4'
+              : 'sc-shell relative py-3.5 lg:flex lg:items-center lg:gap-8 lg:py-4'
           }
         >
-          <NavLink
-            to={modo === 'operador' ? '/inventario' : '/tienda'}
-            className="sc-marca shrink-0 text-[1.55rem] leading-none md:text-[1.9rem]"
-          >
-            SHOPCART
-          </NavLink>
-
-          {!enAuth && (
+          {enAuth ? (
+            <NavLink
+              to={modo === 'operador' ? '/inventario' : '/tienda'}
+              className="sc-marca shrink-0 text-[1.55rem] leading-none lg:text-[1.9rem]"
+            >
+              SHOPCART
+            </NavLink>
+          ) : (
             <>
-              <BarraSecciones
-                es={es}
-                autenticado={!!usuario}
-                modo={modo}
-                className="hidden min-w-0 flex-1 md:flex"
-              />
+              <div className="sc-header-movil">
+                <div className="sc-header-movil-spacer" aria-hidden />
+                <NavLink
+                  to={modo === 'operador' ? '/inventario' : '/tienda'}
+                  className="sc-marca justify-self-center text-center text-[1.55rem] leading-none"
+                >
+                  SHOPCART
+                </NavLink>
+                <div className="sc-header-movil-acciones">{accionesMovil}</div>
+              </div>
 
-              <div className="ml-auto flex items-center gap-2 md:gap-3">
-                {usuario ? (
-                  <>
-                    <button
-                      ref={botonUsuarioRef}
-                      type="button"
-                      aria-label="Cuenta"
-                      aria-expanded={menuAbierto}
-                      title="Cuenta"
-                      onClick={() => setMenuAbierto((v) => !v)}
-                      className={`sc-round-btn ${menuAbierto ? 'sc-round-btn-activo' : ''}`}
-                    >
-                      {cargando ? <span className="text-xs">…</span> : <IconoUsuario />}
-                    </button>
-
-                    {menuAbierto && (
-                      <div
-                        ref={menuRef}
-                        role="menu"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        className="sc-menu-flotante sc-menu-entrar sc-flotante absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-xl p-1.5"
-                      >
-                        <Link
-                          role="menuitem"
-                          to="/cuenta"
-                          onClick={() => setMenuAbierto(false)}
-                          className="block truncate rounded-lg px-3 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
-                        >
-                          {usuario.Correo}
-                        </Link>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuAbierto(false);
-                            void (async () => {
-                              await salir();
-                              navigate('/tienda', {
-                                state: { aviso: 'Sesión cerrada correctamente' },
-                              });
-                            })();
-                          }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                        >
-                          <IconoSalir />
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <NavLink
-                    to="/"
-                    aria-label="Entrar"
-                    title="Entrar"
-                    className={({ isActive }) =>
-                      `sc-round-btn ${isActive ? 'sc-round-btn-activo' : ''}`
-                    }
-                  >
-                    <IconoUsuario />
-                  </NavLink>
-                )}
-
-                {verCarrito && (
-                  <NavLink
-                    to="/carrito"
-                    aria-label="Carrito"
-                    title="Carrito"
-                    className={({ isActive }) =>
-                      `sc-round-btn relative ${isActive ? 'sc-round-btn-activo' : ''}`
-                    }
-                  >
-                    <IconoCarrito />
-                    {piezas > 0 && (
-                      <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-slate-900 px-1 text-[10px] font-semibold leading-4 text-white">
-                        {piezas > 99 ? '99+' : piezas}
-                      </span>
-                    )}
-                  </NavLink>
-                )}
+              <div className="sc-header-escritorio">
+                <NavLink
+                  to={modo === 'operador' ? '/inventario' : '/tienda'}
+                  className="sc-marca shrink-0 text-[1.9rem] leading-none"
+                >
+                  SHOPCART
+                </NavLink>
+                <BarraSecciones items={items} className="min-w-0 flex-1" />
+                <div className="relative ml-auto flex items-center gap-3">
+                  {accionesEscritorio}
+                </div>
               </div>
             </>
           )}
@@ -443,17 +598,14 @@ export function Shell() {
       )}
 
       {!enAuth && (
-        <nav className="sc-header fixed inset-x-0 bottom-0 z-20 border-t md:hidden">
-          <div className="sc-shell overflow-x-auto py-2.5">
-            <BarraSecciones
-              es={es}
-              autenticado={!!usuario}
-              modo={modo}
-              abrirArriba
-              className="flex-nowrap whitespace-nowrap"
-            />
-          </div>
-        </nav>
+        <MenuLateral
+          abierto={drawerAbierto}
+          onCerrar={() => setDrawerAbierto(false)}
+          items={items}
+          usuario={usuario}
+          cargando={cargando}
+          onSalir={() => void cerrarSesion()}
+        />
       )}
     </div>
   );

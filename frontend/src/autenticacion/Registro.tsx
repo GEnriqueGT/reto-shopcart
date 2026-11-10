@@ -1,8 +1,7 @@
-import { Button, FieldError, Input, Label, TextField } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { mensajeDeError } from '../compartido/errores';
-import { Panel } from '../compartido/ui/Panel';
 import { rutaInicio } from '../layout/rutas';
 import { useAuth } from './AuthContexto';
 import { esquemaCredenciales } from './esquema';
@@ -37,45 +36,54 @@ export function Registro() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <Panel className="rounded-[1.75rem]">
-        <h1 className="sc-display text-center text-3xl text-slate-900">Registro</h1>
-        <p className="sc-muted mt-2 text-sm">Crea una cuenta de cliente.</p>
+    <div className="mx-auto w-full max-w-md pb-4">
+      <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">Registro</h1>
+      <p className="sc-listado-pista">Crea una cuenta de cliente.</p>
 
-        <form className="mt-6 grid gap-4" onSubmit={(e) => void onSubmit(e)}>
-          <TextField fullWidth isRequired name="correo" type="email" value={correo} onChange={setCorreo}>
-            <Label>Correo</Label>
-            <Input autoComplete="email" placeholder="tu@correo.com" />
-          </TextField>
+      <form className="mt-8 grid gap-3" onSubmit={(e) => void onSubmit(e)}>
+        <label className="grid gap-1.5 text-sm">
+          <span className="sc-muted">Correo</span>
+          <input
+            className="sc-input sc-input-cuadro w-full"
+            type="email"
+            name="correo"
+            autoComplete="email"
+            required
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+            placeholder="tu@correo.com"
+          />
+        </label>
 
-          <TextField
-            fullWidth
-            isRequired
-            name="contrasena"
+        <label className="grid gap-1.5 text-sm">
+          <span className="sc-muted">Contraseña</span>
+          <input
+            className="sc-input sc-input-cuadro w-full"
             type="password"
+            name="contrasena"
+            autoComplete="new-password"
+            required
             value={contrasena}
-            onChange={setContrasena}
-          >
-            <Label>Contraseña</Label>
-            <Input autoComplete="new-password" placeholder="Mínimo 8 caracteres" />
-          </TextField>
+            onChange={(e) => setContrasena(e.target.value)}
+            placeholder="Mínimo 8 caracteres"
+          />
+        </label>
 
-          {error && <FieldError>{error}</FieldError>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" fullWidth isPending={enviando}>
-            {enviando ? 'Creando…' : 'Crear cuenta'}
-          </Button>
-        </form>
+        <Button type="submit" className="sc-btn-cuadro w-full" isPending={enviando}>
+          {enviando ? 'Creando…' : 'Crear cuenta'}
+        </Button>
+      </form>
 
-        <p className="sc-muted mt-4 text-sm">
-          ¿Ya tienes cuenta?{' '}
-          <Link className="font-medium text-slate-900 underline-offset-2 hover:underline" to="/">
-            Entrar
-          </Link>
-        </p>
-      </Panel>
+      <p className="sc-muted mt-4 text-center text-sm">
+        ¿Ya tienes cuenta?{' '}
+        <Link className="font-medium text-slate-900 underline-offset-2 hover:underline" to="/">
+          Entrar
+        </Link>
+      </p>
 
-      <p className="mt-6 text-center text-sm">
+      <p className="mt-8 text-center text-sm">
         <Link className="sc-muted underline-offset-2 hover:text-slate-900 hover:underline" to="/servicios">
           Verificación de los servicios
         </Link>

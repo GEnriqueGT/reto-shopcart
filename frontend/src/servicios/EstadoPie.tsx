@@ -46,7 +46,7 @@ export function EstadoPie() {
           : 'Servicios no disponibles';
 
   return (
-    <footer className="sc-shell mt-10 pb-6 md:pb-2">
+    <footer className="sc-shell mt-10 flex justify-center pb-6">
       <Link
         to="/servicios"
         className="sc-muted inline-flex items-center gap-2 text-xs transition hover:text-slate-700"

@@ -112,17 +112,20 @@ export function TarjetaAdmin({
   activo,
   acciones,
   onAbrir,
+  icono,
 }: {
   titulo: string;
   meta: string;
   activo: boolean;
   acciones: AccionTarjeta[];
   onAbrir: () => void;
+  icono?: React.ReactNode;
 }) {
   return (
     <div className={`relative ${activo ? '' : 'opacity-60'}`}>
       <button type="button" onClick={onAbrir} className="sc-producto group block h-full w-full text-left">
         <div className="sc-producto-media flex flex-col items-center justify-center gap-2 px-3 py-4 text-center">
+          {icono && <span className="text-slate-700">{icono}</span>}
           <h2 className="line-clamp-3 max-w-full break-words text-base font-bold leading-snug text-slate-900 md:text-lg">
             {titulo}
           </h2>
@@ -267,8 +270,8 @@ export function ModalDetalle({
         if (!open) onCerrar();
       }}
     >
-      <Modal.Container>
-        <Modal.Dialog className="sc-modal-cuadro sm:max-w-md">
+      <Modal.Container placement="center">
+        <Modal.Dialog className="sc-modal-cuadro sc-modal-compacto sm:max-w-md">
           <Modal.CloseTrigger />
           <Modal.Header>
             <Modal.Heading>{titulo}</Modal.Heading>

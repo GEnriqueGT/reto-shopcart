@@ -237,7 +237,7 @@ export function Cola() {
             </span>
           </button>
           {menuAbierto && (
-            <div className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-[0.15rem] p-1.5">
+            <div className="sc-menu-flotante sc-menu-entrar absolute left-0 top-[calc(100%+0.65rem)] z-50 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-[0.15rem] p-1.5">
               <ListaEstados
                 valor={filtros.estado ?? ''}
                 onCambiar={(estado) => {

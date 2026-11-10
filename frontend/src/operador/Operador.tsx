@@ -24,7 +24,7 @@ import type { TipoMovimiento } from './tipos';
 type TabInventario = 'detalles' | 'kardex';
 
 const tabsInventario: { id: TabInventario; etiqueta: string }[] = [
-  { id: 'detalles', etiqueta: 'Detalles' },
+  { id: 'detalles', etiqueta: 'Detalle' },
   { id: 'kardex', etiqueta: 'Kardex' },
 ];
 
@@ -557,8 +557,8 @@ function ModalCrearProducto({
         if (!open) onCerrar();
       }}
     >
-      <Modal.Container>
-        <Modal.Dialog className="sc-modal-cuadro sm:max-w-md">
+      <Modal.Container placement="center">
+        <Modal.Dialog className="sc-modal-cuadro sc-modal-compacto sm:max-w-md">
           <Modal.CloseTrigger />
           <Modal.Header>
             <Modal.Heading>Nuevo producto</Modal.Heading>
@@ -677,8 +677,8 @@ function ModalAgregarImagen({
         if (!open) onCerrar();
       }}
     >
-      <Modal.Container>
-        <Modal.Dialog className="sc-modal-cuadro sm:max-w-md">
+      <Modal.Container placement="center">
+        <Modal.Dialog className="sc-modal-cuadro sc-modal-compacto sm:max-w-md">
           <Modal.CloseTrigger />
           <Modal.Header>
             <Modal.Heading>Agregar imagen</Modal.Heading>
@@ -1638,7 +1638,7 @@ export function Operador() {
             >
               {detalle.data && (
                 <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-                  <div className="flex min-h-0 flex-col gap-4 self-stretch">
+                  <div className="order-2 flex min-h-0 flex-col gap-4 self-stretch lg:order-1">
                     {(() => {
                       const imagenes = [...detalle.data.imagenes].sort((a, b) => a.Orden - b.Orden);
                       const indice = Math.min(indiceImagen, Math.max(0, imagenes.length - 1));
@@ -1706,11 +1706,15 @@ export function Operador() {
                       );
                     })()}
 
-                    <div className="flex shrink-0 flex-wrap gap-3" role="listbox" aria-label="Variantes">
+                    <div
+                      className="flex w-full shrink-0 flex-col gap-3 lg:flex-row lg:flex-wrap"
+                      role="listbox"
+                      aria-label="Variantes"
+                    >
                       {variantes.map((v) => {
                         const activa = v.IDVariante === idVariante;
                         return (
-                          <div key={v.IDVariante} className="relative">
+                          <div key={v.IDVariante} className="relative w-full lg:w-auto">
                             <button
                               type="button"
                               role="option"
@@ -1739,17 +1743,20 @@ export function Operador() {
                         <button
                           type="button"
                           onClick={() => aplicar({ crear: true })}
-                          className="sc-variante-cuadro sc-variante-cuadro-crear"
+                          className="sc-variante-cuadro sc-variante-cuadro-crear w-full lg:w-auto"
                         >
                           <span className="sc-variante-cuadro-sku">Nueva</span>
                           <span className="sc-variante-cuadro-attr">Crear variante</span>
                           <span className="sc-variante-cuadro-precio">+</span>
                         </button>
                       )}
+                      {variantes.length === 0 && !esAdmin && (
+                        <p className="sc-muted text-sm">No hay variantes.</p>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex min-h-0 flex-col">
+                  <div className="order-1 flex min-h-0 flex-col lg:order-2">
                     <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">
                       {detalle.data.Categoria}
                     </p>
