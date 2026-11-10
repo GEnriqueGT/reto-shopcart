@@ -30,6 +30,7 @@ export const esquemaItemCarrito = z
     Precio: dinero,
     Importe: dinero,
     Disponible: z.number().int().nonnegative(),
+    ImagenUrl: z.string().min(1).max(500).nullable(),
   })
   .strict();
 

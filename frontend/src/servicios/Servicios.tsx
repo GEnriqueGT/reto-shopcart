@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Panel } from '../compartido/ui/Panel';
 import { consultarSalud, type Salud } from './api';
 
 type EstadoSalud = 'cargando' | 'ok' | 'error' | 'offline';
@@ -40,20 +39,16 @@ export function Servicios() {
 
   return (
     <div className="grid gap-6 md:gap-8">
-      <header className="md:flex md:items-end md:justify-between md:gap-8">
-        <div>
-          <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">Panel</p>
-          <h1 className="sc-display mt-2 text-[2.1rem] leading-tight text-slate-900 md:text-5xl">
-            Estado del sistema
-          </h1>
-          <p className="sc-muted mt-2 max-w-xl text-sm md:text-base">
-            Comprobación de API, SQL Server y Redis.
-          </p>
-        </div>
-        <p className="sc-muted mt-3 hidden text-sm md:mt-0 md:block">GET /health</p>
+      <header className="text-center">
+        <h1 className="sc-display text-[2.1rem] leading-tight text-slate-900 md:text-5xl">
+          Estado del sistema
+        </h1>
+        <p className="sc-muted mx-auto mt-2 max-w-xl text-sm md:text-base">
+          Comprobación de API, SQL Server y Redis.
+        </p>
       </header>
 
-      <Panel strong className="rounded-[1.75rem] p-6 md:p-8">
+      <div className="border border-slate-900/10 p-6 md:p-8">
         <div className="flex items-start justify-between gap-3 text-sm md:hidden">
           <span className="sc-muted">Disponibilidad</span>
           <span className="sc-muted">GET /health</span>
@@ -88,7 +83,7 @@ export function Servicios() {
             />
           </div>
         </div>
-      </Panel>
+      </div>
 
       <p className="sc-muted text-center text-xs leading-relaxed md:text-left">
         Proxy <code className="text-slate-700">/api</code> · Docker en :5173 · desarrollo con{' '}
@@ -100,7 +95,7 @@ export function Servicios() {
 
 function Chequeo({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolean }) {
   return (
-    <div className="grid justify-items-center gap-2 text-center md:rounded-2xl md:bg-white/50 md:px-3 md:py-4">
+    <div className="grid justify-items-center gap-2 text-center md:rounded-2xl md:px-3 md:py-4">
       <span className="sc-round-btn !h-14 !w-14 text-sm font-semibold text-slate-900 md:!h-16 md:!w-16">
         {titulo.slice(0, 1)}
       </span>

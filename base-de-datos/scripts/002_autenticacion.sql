@@ -220,6 +220,20 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE SP_Autenticacion_ActivarUsuario
+  @IDUsuario INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF NOT EXISTS (SELECT 1 FROM Usuario WHERE IDUsuario = @IDUsuario)
+    THROW 50404, 'USUARIO_NO_ENCONTRADO|El usuario no existe.', 1;
+
+  UPDATE Usuario
+  SET Activo = 1, ActualizadoEn = SYSUTCDATETIME()
+  WHERE IDUsuario = @IDUsuario;
+END
+GO
+
 CREATE OR ALTER PROCEDURE SP_Autenticacion_AsegurarUsuario
   @Correo NVARCHAR(160),
   @HashContrasena NVARCHAR(80),
@@ -248,4 +262,5 @@ GRANT EXECUTE ON SP_Autenticacion_RotarRefresco TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_RevocarSesion TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_ListarUsuarios TO shopcart_app;
 GRANT EXECUTE ON SP_Autenticacion_DesactivarUsuario TO shopcart_app;
+GRANT EXECUTE ON SP_Autenticacion_ActivarUsuario TO shopcart_app;
 GO

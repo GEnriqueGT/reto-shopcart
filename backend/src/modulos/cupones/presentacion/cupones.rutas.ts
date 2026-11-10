@@ -18,6 +18,7 @@ export function rutasCupones(): Router {
   router.post('/cupones', ...admin, controlador.crear);
   router.patch('/cupones/:idCupon', ...admin, controlador.actualizar);
   router.post('/cupones/:idCupon/desactivar', ...admin, controlador.desactivar);
+  router.post('/cupones/:idCupon/activar', ...admin, controlador.activar);
   router.post('/cupones/evaluar', sesion(), limitar('cupon.evaluar'), controlador.evaluar);
 
   return router;

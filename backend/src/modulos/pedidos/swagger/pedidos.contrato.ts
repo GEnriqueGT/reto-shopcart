@@ -13,7 +13,7 @@ const pedido = z
   .object({
     IDPedido: z.number().int(),
     IDUsuario: z.number().int(),
-    IDDireccion: z.number().int(),
+    IDDireccion: z.number().int().nullable(),
     Destinatario: z.string(),
     Linea: z.string(),
     Ciudad: z.string(),
@@ -47,6 +47,7 @@ const detalle = z
     Cantidad: z.number().int(),
     Precio: z.string(),
     Importe: z.string(),
+    ImagenUrl: z.string().nullable(),
   })
   .openapi('DetallePedidoGestion');
 

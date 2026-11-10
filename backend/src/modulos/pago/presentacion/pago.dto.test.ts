@@ -30,6 +30,17 @@ describe('dto de pago', () => {
       llave: ' pago-demo-01 ',
     });
     assert.equal(pago.llave, 'pago-demo-01');
+    const retiro = dtoIniciarPago.parse({
+      idMetodoEnvio: 1,
+      llave: 'pago-retiro-01',
+    });
+    assert.equal(retiro.idDireccion, undefined);
+    const sinDireccion = dtoIniciarPago.parse({
+      idDireccion: null,
+      idMetodoEnvio: 1,
+      llave: 'pago-retiro-02',
+    });
+    assert.equal(sinDireccion.idDireccion, null);
     assert.throws(() => dtoIniciarPago.parse({ idDireccion: 1, idMetodoEnvio: 2, llave: 'corta' }));
     assert.throws(() =>
       dtoIniciarPago.parse({ idDireccion: 1, idMetodoEnvio: 2, llave: '{{llavePago}}' }),

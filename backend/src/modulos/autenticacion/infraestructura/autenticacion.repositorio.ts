@@ -94,3 +94,9 @@ export async function desactivarUsuario(idUsuario: number): Promise<void> {
     { nombre: 'IDUsuario', tipo: sql.Int(), valor: idUsuario },
   ]);
 }
+
+export async function activarUsuario(idUsuario: number): Promise<void> {
+  await ejecutarProcedimiento('SP_Autenticacion_ActivarUsuario', [
+    { nombre: 'IDUsuario', tipo: sql.Int(), valor: idUsuario },
+  ]);
+}

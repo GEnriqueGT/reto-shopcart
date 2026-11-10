@@ -112,7 +112,13 @@ BEGIN
     v.Sku, p.Nombre, p.IDCategoria, v.Precio,
     CAST(ROUND(v.Precio * i.Cantidad, 2) AS DECIMAL(18, 2)) AS Importe,
     -- La reserva nace con el pedido. Hasta entonces lo disponible es la existencia.
-    v.Existencia AS Disponible
+    v.Existencia AS Disponible,
+    (
+      SELECT TOP (1) img.Url
+      FROM ImagenProducto img
+      WHERE img.IDProducto = p.IDProducto
+      ORDER BY img.Orden, img.IDImagenProducto
+    ) AS ImagenUrl
   FROM ItemCarrito i
   JOIN Variante v ON v.IDVariante = i.IDVariante
   JOIN Producto p ON p.IDProducto = v.IDProducto

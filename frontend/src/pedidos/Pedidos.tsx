@@ -1,43 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { quetzales } from '../compartido/dinero';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
-import { Panel } from '../compartido/ui/Panel';
+import { MenuFila, type AccionFila } from '../compartido/ui/MenuFila';
+import { ModalConfirmacion } from '../compartido/ui/ModalConfirmacion';
 import * as api from './api';
-import { etiquetaEstado, estadosFiltro, formatearFecha } from './estado';
-import type { EstadoPedido, FiltrosPedidos } from './tipos';
+import { etiquetaEstado, estadosFiltro, formatearFecha, sePuedeCancelar } from './estado';
+import { direccionCorta, ModalPedido } from './ModalPedido';
+import { PaginacionPedidos } from './PaginacionPedidos';
+import type { EstadoPedido, FiltrosPedidos, Pedido } from './tipos';
 
 const TAMANO = 10;
-
-function IconoIzquierda() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M14.5 6.5 9 12l5.5 5.5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function IconoDerecha() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M9.5 6.5 15 12l-5.5 5.5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 function IconoFiltro() {
   return (
@@ -110,9 +85,13 @@ function ListaEstados({
 }
 
 export function Pedidos() {
+  const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
-  const filtros = filtrosDesdeBusqueda(params);
+  const filtros = useMemo(() => filtrosDesdeBusqueda(params), [params]);
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [idAbierto, setIdAbierto] = useState<number | null>(null);
+  const [idCancelar, setIdCancelar] = useState<number | null>(null);
+  const [errorAccion, setErrorAccion] = useState<string | null>(null);
   const anclaRef = useRef<HTMLDivElement>(null);
 
   const consulta = useQuery({
@@ -120,8 +99,34 @@ export function Pedidos() {
     queryFn: () => api.listarPedidos(filtros),
   });
 
+  const mutCancelar = useMutation({
+    mutationFn: (idPedido: number) => api.cancelarPedido(idPedido),
+    onSuccess: async () => {
+      setErrorAccion(null);
+      setIdCancelar(null);
+      await queryClient.invalidateQueries({ queryKey: api.clavePedidos });
+    },
+    onError: (err) => {
+      setIdCancelar(null);
+      setErrorAccion(mensajeDeError(err));
+    },
+  });
+
   const total = consulta.data?.total ?? 0;
-  const totalPaginas = Math.max(1, Math.ceil(total / TAMANO));
+
+  function accionesPedido(pedido: Pedido): AccionFila[] {
+    const acciones: AccionFila[] = [
+      { etiqueta: 'Ver detalle', onPress: () => setIdAbierto(pedido.IDPedido) },
+    ];
+    if (sePuedeCancelar(pedido.Estado)) {
+      acciones.push({
+        etiqueta: 'Cancelar pedido',
+        deshabilitada: mutCancelar.isPending,
+        onPress: () => setIdCancelar(pedido.IDPedido),
+      });
+    }
+    return acciones;
+  }
 
   useEffect(() => {
     if (!menuAbierto) return;
@@ -150,19 +155,17 @@ export function Pedidos() {
 
   return (
     <div className="pb-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">Cliente</p>
-          <h1 className="sc-display mt-2 text-3xl text-slate-900 md:text-4xl">Pedidos</h1>
-        </div>
+      <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">Pedidos</h1>
+      <p className="sc-listado-pista">Clickea para ver el detalle</p>
 
+      <div className="mt-5 mb-2 flex justify-start">
         <div ref={anclaRef} className="relative">
           <button
             type="button"
             aria-expanded={menuAbierto}
             aria-haspopup="listbox"
             onClick={() => setMenuAbierto((v) => !v)}
-            className={`sc-nav inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm ${
+            className={`sc-nav inline-flex items-center gap-2 rounded-[0.15rem] px-3 py-2 text-sm ${
               menuAbierto ? 'sc-round-btn-activo' : ''
             }`}
           >
@@ -173,7 +176,7 @@ export function Pedidos() {
           </button>
 
           {menuAbierto && (
-            <div className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-1.5">
+            <div className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.65rem)] z-50 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-[0.15rem] p-1.5">
               <ListaEstados
                 valor={filtros.estado ?? ''}
                 onCambiar={(estado) => {
@@ -187,66 +190,67 @@ export function Pedidos() {
       </div>
 
       <div className="mt-6">
+        {errorAccion && <p className="mb-3 text-center text-sm text-red-600">{errorAccion}</p>}
         <Estado
           cargando={consulta.isLoading}
           error={consulta.isError ? mensajeDeError(consulta.error) : null}
           vacio={!consulta.isLoading && (consulta.data?.pedidos.length ?? 0) === 0}
           vacioTexto="Aún no hay pedidos."
         >
-          <ul className="grid gap-3">
+          <ul className="grid">
             {(consulta.data?.pedidos ?? []).map((pedido) => (
-              <li key={pedido.IDPedido}>
-                <Link to={`/pedidos/${pedido.IDPedido}`} className="block">
-                  <Panel className="rounded-[1.5rem] transition hover:-translate-y-0.5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="sc-muted text-xs font-medium uppercase tracking-[0.14em]">
-                          Pedido #{pedido.IDPedido}
-                        </p>
-                        <h2 className="sc-display mt-1 text-xl text-slate-900">
-                          {etiquetaEstado[pedido.Estado]}
-                        </h2>
-                        <p className="sc-muted mt-1 text-sm">{formatearFecha(pedido.CreadoEn)}</p>
-                      </div>
-                      <p className="sc-display shrink-0 text-xl text-slate-900">
-                        {quetzales(pedido.Total)}
-                      </p>
-                    </div>
-                  </Panel>
-                </Link>
+              <li key={pedido.IDPedido} className="sc-pedido-fila-item">
+                <button
+                  type="button"
+                  className="sc-pedido-fila"
+                  onClick={() => setIdAbierto(pedido.IDPedido)}
+                >
+                  <p className="sc-display text-xl text-slate-900 md:text-2xl">
+                    {formatearFecha(pedido.CreadoEn)}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">
+                    {direccionCorta(pedido)}
+                  </p>
+                  <p className="sc-muted mt-2 text-xs font-medium uppercase tracking-[0.14em]">
+                    #{pedido.IDPedido} · {etiquetaEstado[pedido.Estado]}
+                  </p>
+                  <p className="sc-display mt-2 text-center text-xl text-slate-900">
+                    {quetzales(pedido.Total)}
+                  </p>
+                </button>
+                <MenuFila
+                  etiqueta={`pedido ${pedido.IDPedido}`}
+                  acciones={accionesPedido(pedido)}
+                />
               </li>
             ))}
           </ul>
 
-          {total > TAMANO && (
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <p className="sc-muted text-sm">
-                {total} pedidos · página {filtros.pagina} de {totalPaginas}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label="Página anterior"
-                  disabled={filtros.pagina <= 1}
-                  onClick={() => aplicar({ pagina: filtros.pagina - 1 })}
-                  className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
-                >
-                  <IconoIzquierda />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Página siguiente"
-                  disabled={filtros.pagina >= totalPaginas}
-                  onClick={() => aplicar({ pagina: filtros.pagina + 1 })}
-                  className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
-                >
-                  <IconoDerecha />
-                </button>
-              </div>
-            </div>
-          )}
+          <PaginacionPedidos
+            pagina={filtros.pagina}
+            total={total}
+            tamano={TAMANO}
+            onCambiar={(pagina) => aplicar({ pagina })}
+          />
         </Estado>
       </div>
+
+      <ModalPedido
+        idPedido={idAbierto}
+        abierto={idAbierto !== null}
+        onCerrar={() => setIdAbierto(null)}
+      />
+      <ModalConfirmacion
+        abierto={idCancelar !== null}
+        titulo="Cancelar pedido"
+        mensaje={`¿Seguro que quieres cancelar el pedido #${idCancelar ?? ''}?`}
+        confirmarEtiqueta="Cancelar pedido"
+        pendiente={mutCancelar.isPending}
+        onCerrar={() => setIdCancelar(null)}
+        onConfirmar={() => {
+          if (idCancelar) mutCancelar.mutate(idCancelar);
+        }}
+      />
     </div>
   );
 }

@@ -9,7 +9,7 @@ export type EstadoPedido =
 export type Pedido = {
   IDPedido: number;
   IDUsuario: number;
-  IDDireccion: number;
+  IDDireccion: number | null;
   Destinatario: string;
   Linea: string;
   Ciudad: string;
@@ -41,6 +41,7 @@ export type DetallePedido = {
   Cantidad: number;
   Precio: string;
   Importe: string;
+  ImagenUrl: string | null;
 };
 
 export type TransicionPedido = {
@@ -83,4 +84,5 @@ export type FiltrosPedidos = {
   pagina: number;
   tamano: number;
   estado?: EstadoPedido;
+  idUsuario?: number;
 };

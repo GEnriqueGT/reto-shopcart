@@ -40,6 +40,7 @@ const item = z
     Precio: z.string(),
     Importe: z.string(),
     Disponible: z.number().int(),
+    ImagenUrl: z.string().nullable(),
   })
   .openapi('ItemCarrito');
 

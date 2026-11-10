@@ -22,6 +22,7 @@ const categoria = z
     IDCategoria: z.number().int(),
     Nombre: z.string(),
     Activo: z.boolean(),
+    Productos: z.number().int().nonnegative().optional(),
   })
   .openapi('Categoria');
 
@@ -119,6 +120,7 @@ const busqueda = z
         Categoria: z.string(),
         PrecioDesde: z.string(),
         Disponible: z.boolean(),
+        Variantes: z.number().int(),
         ImagenUrl: z.string().nullable(),
       }),
     ),
@@ -251,6 +253,20 @@ registro.registerPath({
   request: { params: parametroCategoria },
   responses: {
     204: { description: 'La categoría quedó inactiva' },
+    404: json(error, 'La categoría no existe'),
+    ...denegado,
+  },
+});
+
+registro.registerPath({
+  method: 'post',
+  path: '/catalogo/categorias/{idCategoria}/activar',
+  tags: tag,
+  summary: 'Reactivar una categoría',
+  security: acceso,
+  request: { params: parametroCategoria },
+  responses: {
+    204: { description: 'La categoría quedó activa' },
     404: json(error, 'La categoría no existe'),
     ...denegado,
   },

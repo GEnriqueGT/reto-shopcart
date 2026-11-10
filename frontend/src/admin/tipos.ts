@@ -2,6 +2,7 @@ export type CategoriaAdmin = {
   IDCategoria: number;
   Nombre: string;
   Activo: boolean;
+  Productos?: number;
 };
 
 export type VarianteAdmin = {

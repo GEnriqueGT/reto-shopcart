@@ -14,6 +14,7 @@ import {
   asegurarUsuario,
   buscarPorCorreo,
   buscarPorId,
+  activarUsuario,
   desactivarUsuario,
   guardarSesion,
   listarUsuarios,
@@ -98,6 +99,10 @@ export async function listar(consulta: Pagina) {
 
 export function desactivar(idUsuario: number) {
   return desactivarUsuario(idUsuario);
+}
+
+export function activar(idUsuario: number) {
+  return activarUsuario(idUsuario);
 }
 
 async function rotar(usuario: UsuarioSesion, idSesion: string, tokenPresentado: string) {

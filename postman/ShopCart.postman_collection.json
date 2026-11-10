@@ -120,6 +120,14 @@
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
             "url": "{{baseUrl}}/autenticacion/usuarios/{{idUsuario}}/desactivar"
           }
+        },
+        {
+          "name": "Activar usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/autenticacion/usuarios/{{idUsuario}}/activar"
+          }
         }
       ]
     },
@@ -203,6 +211,14 @@
             "method": "POST",
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
             "url": "{{baseUrl}}/catalogo/categorias/{{idCategoria}}/desactivar"
+          }
+        },
+        {
+          "name": "Activar categoría",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/catalogo/categorias/{{idCategoria}}/activar"
           }
         },
         {
@@ -476,6 +492,14 @@
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
             "url": "{{baseUrl}}/cupones/{{idCupon}}/desactivar"
           }
+        },
+        {
+          "name": "Activar cupón",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/cupones/{{idCupon}}/activar"
+          }
         }
       ]
     },
@@ -745,7 +769,7 @@
           }
         },
         {
-          "name": "Listar seguimiento",
+          "name": "Listar pedidos (operación)",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
@@ -753,7 +777,7 @@
           }
         },
         {
-          "name": "Consultar pedido",
+          "name": "Consultar pedido propio",
           "event": [
             {
               "listen": "test",
@@ -773,7 +797,23 @@
           }
         },
         {
-          "name": "Cancelar pedido",
+          "name": "Consultar pedido (operación)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}"
+          }
+        },
+        {
+          "name": "Cancelar pedido propio",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/pedidos/{{idPedido}}/cancelar"
+          }
+        },
+        {
+          "name": "Cancelar pedido (operación)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],

@@ -22,7 +22,7 @@ export function desactivarDireccion(idDireccion: number) {
 }
 
 export function iniciarPago(cuerpo: {
-  idDireccion: number;
+  idDireccion?: number | null;
   idMetodoEnvio: number;
   llave: string;
 }) {

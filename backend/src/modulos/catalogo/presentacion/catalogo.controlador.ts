@@ -42,6 +42,12 @@ export const desactivarCategoria = envolver(async (req: Request, res: Response) 
   res.status(204).send();
 });
 
+export const activarCategoria = envolver(async (req: Request, res: Response) => {
+  const params = dtoIdCategoria.parse(req.params);
+  await servicio.activarCategoria(params.idCategoria);
+  res.status(204).send();
+});
+
 export const buscar = envolver(async (req: Request, res: Response) => {
   const consulta = dtoBuscarCatalogo.parse(req.query);
   res.status(200).json(await servicio.buscar(consulta));

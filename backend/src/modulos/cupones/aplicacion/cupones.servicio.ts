@@ -17,6 +17,10 @@ export function desactivar(idCupon: number): Promise<void> {
   return repositorio.desactivar(idCupon);
 }
 
+export function activar(idCupon: number): Promise<void> {
+  return repositorio.activar(idCupon);
+}
+
 export function listar(consulta: ListarCupones): Promise<PaginaCupones> {
   return repositorio.listar(consulta).then((grupos) => {
     const total = grupos[1]?.[0] as { Total?: number } | undefined;

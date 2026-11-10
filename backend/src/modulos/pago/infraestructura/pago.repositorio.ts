@@ -39,7 +39,7 @@ export async function listarEnvios(): Promise<unknown[]> {
 export async function iniciar(idUsuario: number, datos: IniciarPago, minutos: number): Promise<unknown[][]> {
   const resultado = await ejecutarProcedimiento('SP_Pago_Iniciar', [
     { nombre: 'IDUsuario', tipo: sql.Int(), valor: idUsuario },
-    { nombre: 'IDDireccion', tipo: sql.Int(), valor: datos.idDireccion },
+    { nombre: 'IDDireccion', tipo: sql.Int(), valor: datos.idDireccion ?? null },
     { nombre: 'IDMetodoEnvio', tipo: sql.Int(), valor: datos.idMetodoEnvio },
     { nombre: 'Llave', tipo: sql.NVarChar(64), valor: datos.llave },
     { nombre: 'Minutos', tipo: sql.Int(), valor: minutos },

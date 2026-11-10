@@ -130,13 +130,14 @@ Sesión en el navegador: access Bearer en memoria; refresh en `sessionStorage`; 
 | `/tienda`, `/tienda/:id` | Público | Catálogo con filtros/orden/paginación en servidor y detalle de variante |
 | `/carrito` | Público / sesión | Ítems, cupón, ir a pagar |
 | `/pago` | Cliente+ | Direcciones, envío, iniciar/cobrar con llave UUID |
-| `/pedidos`, `/pedidos/:id` | Sesión | Listado, detalle, cancelar; operador/admin también transiciona y devuelve |
-| `/operador` | Operador / Admin | Inventario (existencia, kardex, movimientos) y cola de pedidos |
-| `/admin` | Admin | CRUD categorías, productos/variantes/imágenes, cupones y usuarios |
-| `/reportes` | Admin | Gráficas (ventas, categorías, top), pedidos, carritos abandonados y bitácora |
+| `/pedidos` | Sesión | Mis pedidos (listado + modal de detalle; API con `fijarDueno`) |
+| `/inventario`, `/inventario/cola` | Operador / Admin | Inventario visual y pedidos usuarios; API `/pedidos` con filtro por rol Operador/Admin |
+| `/admin/categorias`, `/admin/cupones`, `/admin/usuarios` | Admin | CRUD categorías, cupones y usuarios (productos/imágenes en Inventario) |
+| `/reportes` | Admin | Gráficas (ventas, categorías, top), pedidos y carritos abandonados |
+| `/bitacora` | Admin | Historial inmutable de acciones |
 | `/cuenta`, `/servicios` | Sesión / todos | Cuenta y salud del sistema |
 
-La barra de secciones muestra Tienda (todos), Pedidos (con sesión), Operador (Operador/Admin), Admin y Reportes (Admin). En móvil va fija abajo.
+La barra depende del interruptor de vista (Operador/Admin): **Vista de cliente** = Tienda/Pedidos/Carrito; **Vista de admin** = Productos (Inventario/Cupones/Categorías), Información (Pedidos usuarios/Reportes/Bitácora) y Usuarios; **Vista de operador** = Inventario/Pedidos usuarios. En móvil va fija abajo.
 
 Antes de cerrar cada fase del front: `pnpm audit` sin avisos abiertos. Los overrides del workspace (p. ej. `minimatch`) cierran hallazgos de la cadena de suministro. La guía oral de defensa (backend + frontend) está fuera del repo en `Defensa-ShopCart.pdf` del escritorio.
 
@@ -237,4 +238,4 @@ erDiagram
 | Pago | Dirección, reserva, cobro idempotente |
 | Pedidos | Transiciones, cancelación, devolución, tablero de colas |
 | Reportes | Ventas, ranking, pedidos cobrados, carritos abandonados |
-| Bitácora | Historial inmutable, `GET /bitacora` |
+| Bitácora | Historial inmutable con referencia a producto/categoría; `GET /bitacora` abre el detalle |

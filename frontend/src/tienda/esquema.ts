@@ -40,7 +40,7 @@ export function filtrosDesdeBusqueda(params: URLSearchParams): FiltrosCatalogo {
   const idCategoria = leerEntero(params.get('categoria'), 0);
   return {
     pagina: leerEntero(params.get('pagina'), 1),
-    tamano: Math.min(leerEntero(params.get('tamano'), 12), 50),
+    tamano: Math.min(leerEntero(params.get('tamano'), 15), 50),
     texto: params.get('texto')?.trim() || undefined,
     idCategoria: idCategoria > 0 ? idCategoria : undefined,
     precioMin: normalizarPrecioConsulta(params.get('precioMin') ?? undefined),
@@ -53,7 +53,7 @@ export function filtrosDesdeBusqueda(params: URLSearchParams): FiltrosCatalogo {
 export function filtrosABusqueda(filtros: FiltrosCatalogo): URLSearchParams {
   const q = new URLSearchParams();
   if (filtros.pagina !== 1) q.set('pagina', String(filtros.pagina));
-  if (filtros.tamano !== 12) q.set('tamano', String(filtros.tamano));
+  if (filtros.tamano !== 15) q.set('tamano', String(filtros.tamano));
   if (filtros.texto) q.set('texto', filtros.texto);
   if (filtros.idCategoria) q.set('categoria', String(filtros.idCategoria));
   if (filtros.precioMin) q.set('precioMin', filtros.precioMin);

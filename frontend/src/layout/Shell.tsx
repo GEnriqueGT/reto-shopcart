@@ -1,42 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../autenticacion/AuthContexto';
 import { claveCarrito, consultarCarrito } from '../carrito/api';
 import { Desplazamiento } from '../compartido/ui/Desplazamiento';
 import { EstadoPie } from '../servicios/EstadoPie';
+import { useModoVista, type ModoVista } from './ModoVista';
 
-const trazo = 2.05;
-
-/** Escaparate / tienda para el acceso al catálogo. */
-function IconoTienda() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4.5 10.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-8.5"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3.5 7.5 5.2 4.2A1.5 1.5 0 0 1 6.5 3.5h11a1.5 1.5 0 0 1 1.3.7L20.5 7.5"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M3.5 7.5h17" stroke="currentColor" strokeWidth={trazo} strokeLinecap="round" />
-      <path
-        d="M10 20.5v-6h4v6"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+const trazo = 1.75;
 
 function IconoCarrito() {
   return (
@@ -56,7 +27,7 @@ function IconoCarrito() {
 
 function IconoUsuario() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="12" cy="9" r="3.35" stroke="currentColor" strokeWidth={trazo} />
       <path
         d="M5.5 19.25c1.4-2.8 3.7-4.25 6.5-4.25s5.1 1.45 6.5 4.25"
@@ -70,7 +41,7 @@ function IconoUsuario() {
 
 function IconoSalir() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M10 5.5H7.5A2 2 0 0 0 5.5 7.5v9a2 2 0 0 0 2 2H10M14 8.5 18.5 12 14 15.5M18 12H10"
         stroke="currentColor"
@@ -82,203 +53,303 @@ function IconoSalir() {
   );
 }
 
-function IconoPedidos() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M7.5 4.5h9A1.5 1.5 0 0 1 18 6v13.2l-3.2-1.8-2.8 1.8-2.8-1.8L6 19.2V6a1.5 1.5 0 0 1 1.5-1.5Z"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinejoin="round"
-      />
-      <path d="M9 9h6M9 12.5h6" stroke="currentColor" strokeWidth={trazo} strokeLinecap="round" />
-    </svg>
-  );
+function etiquetaVistaTrabajo(es: (...roles: string[]) => boolean) {
+  return es('Administrador') ? 'Vista de admin' : 'Vista de operador';
 }
 
-function IconoOperador() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4.5 8.5 12 4.5l7.5 4V19a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4.5 19V8.5Z"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinejoin="round"
-      />
-      <path d="M9.5 20.5v-6h5v6" stroke="currentColor" strokeWidth={trazo} strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconoAdmin() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="3.1" stroke="currentColor" strokeWidth={trazo} />
-      <path
-        d="M12 4.5v2.2M12 17.3v2.2M4.5 12h2.2M17.3 12h2.2M6.7 6.7l1.6 1.6M15.7 15.7l1.6 1.6M17.3 6.7l-1.6 1.6M8.3 15.7l-1.6 1.6"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function IconoReportes() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4.5 19.5h15M7 19.5V11M12 19.5V6.5M17 19.5v-5"
-        stroke="currentColor"
-        strokeWidth={trazo}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-/** Botón redondo suelto (usuario / carrito). */
-function NavIcono({
-  to,
-  label,
-  children,
-  badge,
+function InterruptorVerComo({
+  modo,
+  onCambiar,
+  es,
 }: {
-  to: string;
-  label: string;
-  children: React.ReactNode;
-  badge?: number;
+  modo: ModoVista;
+  onCambiar: (siguiente: ModoVista) => void;
+  es: (...roles: string[]) => boolean;
 }) {
+  const [abierto, setAbierto] = useState(false);
+  const anclaRef = useRef<HTMLDivElement>(null);
+  const etiquetaTrabajo = etiquetaVistaTrabajo(es);
+  const etiqueta = modo === 'operador' ? etiquetaTrabajo : 'Vista de cliente';
+
+  useEffect(() => {
+    if (!abierto) return;
+    function alPointer(evento: MouseEvent | TouchEvent) {
+      if (!anclaRef.current?.contains(evento.target as Node)) setAbierto(false);
+    }
+    function alTecla(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') setAbierto(false);
+    }
+    document.addEventListener('mousedown', alPointer);
+    document.addEventListener('touchstart', alPointer);
+    document.addEventListener('keydown', alTecla);
+    return () => {
+      document.removeEventListener('mousedown', alPointer);
+      document.removeEventListener('touchstart', alPointer);
+      document.removeEventListener('keydown', alTecla);
+    };
+  }, [abierto]);
+
+  function elegir(siguiente: ModoVista) {
+    setAbierto(false);
+    if (siguiente !== modo) onCambiar(siguiente);
+  }
+
   return (
-    <NavLink
-      to={to}
-      aria-label={label}
-      title={label}
-      className={({ isActive }) =>
-        `sc-round-btn relative ${isActive ? 'sc-round-btn-activo' : ''}`
-      }
-    >
-      {children}
-      {badge != null && badge > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-slate-900 px-1 text-[10px] font-semibold leading-4 text-white">
-          {badge > 99 ? '99+' : badge}
-        </span>
+    <div ref={anclaRef} className="sc-ver-como relative">
+      <button
+        type="button"
+        aria-label="Cambiar vista"
+        aria-haspopup="listbox"
+        aria-expanded={abierto}
+        className={`sc-ver-como-trigger ${abierto ? 'sc-ver-como-trigger-abierto' : ''}`}
+        onClick={() => setAbierto((v) => !v)}
+      >
+        <span>{etiqueta}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {abierto && (
+        <div
+          role="listbox"
+          aria-label="Modo de vista"
+          className="sc-menu-flotante sc-menu-entrar absolute right-0 top-[calc(100%+0.45rem)] z-50 min-w-[11.5rem] overflow-hidden rounded-[0.15rem] p-1"
+        >
+          {(['cliente', 'operador'] as const).map((opcion) => {
+            const activa = opcion === modo;
+            return (
+              <button
+                key={opcion}
+                type="button"
+                role="option"
+                aria-selected={activa}
+                className={`sc-ver-como-opcion ${activa ? 'sc-ver-como-opcion-activa' : ''}`}
+                onClick={() => elegir(opcion)}
+              >
+                {opcion === 'cliente' ? 'Vista de cliente' : etiquetaTrabajo}
+              </button>
+            );
+          })}
+        </div>
       )}
-    </NavLink>
+    </div>
+  );
+}
+
+type EnlaceNav = { to: string; label: string; end?: boolean };
+type ItemNav =
+  | ({ tipo: 'enlace' } & EnlaceNav)
+  | { tipo: 'submenu'; label: string; hijos: EnlaceNav[] };
+
+function rutaActiva(pathname: string, to: string, end?: boolean) {
+  if (end) return pathname === to;
+  return pathname === to || pathname.startsWith(`${to}/`);
+}
+
+function SubmenuSeccion({
+  label,
+  hijos,
+  abrirArriba = false,
+}: {
+  label: string;
+  hijos: EnlaceNav[];
+  abrirArriba?: boolean;
+}) {
+  const { pathname } = useLocation();
+  const [abierto, setAbierto] = useState(false);
+  const anclaRef = useRef<HTMLDivElement>(null);
+  const activo = hijos.some((h) => rutaActiva(pathname, h.to, h.end));
+
+  useEffect(() => {
+    if (!abierto) return;
+    function alPointer(evento: MouseEvent | TouchEvent) {
+      if (!anclaRef.current?.contains(evento.target as Node)) setAbierto(false);
+    }
+    function alTecla(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') setAbierto(false);
+    }
+    document.addEventListener('mousedown', alPointer);
+    document.addEventListener('touchstart', alPointer);
+    document.addEventListener('keydown', alTecla);
+    return () => {
+      document.removeEventListener('mousedown', alPointer);
+      document.removeEventListener('touchstart', alPointer);
+      document.removeEventListener('keydown', alTecla);
+    };
+  }, [abierto]);
+
+  useEffect(() => {
+    setAbierto(false);
+  }, [pathname]);
+
+  return (
+    <div ref={anclaRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={abierto}
+        className={`sc-nav-item sc-nav-submenu-trigger ${activo || abierto ? 'sc-nav-item-activo' : ''}`}
+        onClick={() => setAbierto((v) => !v)}
+      >
+        <span>{label}</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {abierto && (
+        <div
+          role="menu"
+          aria-label={label}
+          className={`sc-menu-flotante sc-menu-entrar absolute left-0 z-50 min-w-[10.5rem] overflow-hidden rounded-[0.15rem] p-1 ${
+            abrirArriba ? 'bottom-[calc(100%+0.4rem)]' : 'top-[calc(100%+0.4rem)]'
+          }`}
+        >
+          {hijos.map((hijo) => {
+            const hijoActivo = rutaActiva(pathname, hijo.to, hijo.end);
+            return (
+              <NavLink
+                key={hijo.to}
+                role="menuitem"
+                to={hijo.to}
+                end={hijo.end}
+                onClick={() => setAbierto(false)}
+                className={`sc-nav-submenu-item ${hijoActivo ? 'sc-nav-submenu-item-activo' : ''}`}
+              >
+                {hijo.label}
+              </NavLink>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
 function BarraSecciones({
   es,
   autenticado,
+  modo,
+  className = '',
+  abrirArriba = false,
 }: {
   es: (...roles: string[]) => boolean;
   autenticado: boolean;
+  modo: ModoVista;
+  className?: string;
+  abrirArriba?: boolean;
 }) {
-  const { pathname } = useLocation();
-  const pistaRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [cristal, setCristal] = useState({ left: 0, width: 0, listo: false });
+  const items = useMemo((): ItemNav[] => {
+    if (modo === 'operador' && es('Operador', 'Administrador')) {
+      if (es('Administrador')) {
+        return [
+          {
+            tipo: 'submenu',
+            label: 'Productos',
+            hijos: [
+              { to: '/inventario', label: 'Inventario', end: true },
+              { to: '/admin/cupones', label: 'Cupones' },
+              { to: '/admin/categorias', label: 'Categorías' },
+            ],
+          },
+          {
+            tipo: 'submenu',
+            label: 'Información',
+            hijos: [
+              { to: '/inventario/cola', label: 'Pedidos usuarios' },
+              { to: '/reportes', label: 'Reportes' },
+              { to: '/bitacora', label: 'Bitácora' },
+            ],
+          },
+          { tipo: 'enlace', to: '/admin/usuarios', label: 'Usuarios' },
+        ];
+      }
 
-  const items = useMemo(() => {
-    const lista: { to: string; label: string; nodo: React.ReactNode }[] = [
-      { to: '/tienda', label: 'Tienda', nodo: <IconoTienda /> },
-    ];
+      return [
+        { tipo: 'enlace', to: '/inventario', label: 'Inventario', end: true },
+        { tipo: 'enlace', to: '/inventario/cola', label: 'Pedidos usuarios' },
+      ];
+    }
+
+    const lista: ItemNav[] = [{ tipo: 'enlace', to: '/tienda', label: 'Tienda' }];
     if (autenticado) {
-      lista.push({ to: '/pedidos', label: 'Pedidos', nodo: <IconoPedidos /> });
-    }
-    if (es('Operador', 'Administrador')) {
-      lista.push({ to: '/operador', label: 'Operador', nodo: <IconoOperador /> });
-    }
-    if (es('Administrador')) {
-      lista.push(
-        { to: '/admin', label: 'Admin', nodo: <IconoAdmin /> },
-        { to: '/reportes', label: 'Reportes', nodo: <IconoReportes /> },
-      );
+      lista.push({ tipo: 'enlace', to: '/pedidos', label: 'Pedidos' });
     }
     return lista;
-  }, [autenticado, es]);
-
-  const activoIdx = items.findIndex(
-    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`),
-  );
-
-  useLayoutEffect(() => {
-    function medir() {
-      const pista = pistaRef.current;
-      const el = activoIdx >= 0 ? itemRefs.current[activoIdx] : null;
-      if (!pista || !el) {
-        setCristal((c) => ({ ...c, listo: false }));
-        return;
-      }
-      setCristal({
-        left: el.offsetLeft,
-        width: el.offsetWidth,
-        listo: true,
-      });
-    }
-
-    medir();
-    window.addEventListener('resize', medir);
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(medir) : null;
-    if (pistaRef.current) ro?.observe(pistaRef.current);
-    return () => {
-      window.removeEventListener('resize', medir);
-      ro?.disconnect();
-    };
-  }, [activoIdx, items]);
+  }, [autenticado, es, modo]);
 
   return (
-    <div ref={pistaRef} className="sc-nav relative flex items-center gap-1 rounded-full px-2 py-1.5">
-      <span
-        aria-hidden
-        className={`sc-nav-cristal ${cristal.listo ? 'sc-nav-cristal-listo' : ''}`}
-        style={{
-          width: cristal.width,
-          transform: `translateX(${cristal.left}px)`,
-        }}
-      />
-      {items.map((item, i) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          aria-label={item.label}
-          title={item.label}
-          ref={(nodo) => {
-            itemRefs.current[i] = nodo;
-          }}
-          className={({ isActive }) =>
-            `sc-nav-item relative z-[1] flex items-center justify-center rounded-full px-4 py-2.5 ${
-              isActive ? 'sc-nav-item-activo' : ''
-            }`
-          }
-        >
-          {item.nodo}
-        </NavLink>
-      ))}
-    </div>
+    <nav className={`sc-nav ${className}`} aria-label="Secciones">
+      {items.map((item) =>
+        item.tipo === 'submenu' ? (
+          <SubmenuSeccion
+            key={item.label}
+            label={item.label}
+            hijos={item.hijos}
+            abrirArriba={abrirArriba}
+          />
+        ) : (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `sc-nav-item ${isActive ? 'sc-nav-item-activo' : ''}`}
+          >
+            {item.label}
+          </NavLink>
+        ),
+      )}
+    </nav>
   );
 }
 
 export function Shell() {
   const { usuario, cargando, salir, es } = useAuth();
-  const { pathname } = useLocation();
+  const { modo, puedeCambiar, setModo } = useModoVista();
+  const location = useLocation();
+  const { pathname } = location;
   const navigate = useNavigate();
   const enAuth = !usuario && (pathname === '/' || pathname === '/registro');
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const botonUsuarioRef = useRef<HTMLButtonElement>(null);
+  const verCarrito = !enAuth && modo === 'cliente';
 
   const carrito = useQuery({
     queryKey: claveCarrito,
     queryFn: consultarCarrito,
-    enabled: !enAuth,
+    enabled: verCarrito,
   });
   const piezas = carrito.data?.items.reduce((suma, item) => suma + item.Cantidad, 0) ?? 0;
 
   useEffect(() => {
     setMenuAbierto(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const estado = location.state as { aviso?: string } | null;
+    if (!estado?.aviso) return;
+    setAviso(estado.aviso);
+    navigate(`${pathname}${location.search}`, { replace: true, state: null });
+  }, [location.state, location.search, navigate, pathname]);
+
+  useEffect(() => {
+    if (!aviso) return;
+    const id = window.setTimeout(() => setAviso(null), 3200);
+    return () => window.clearTimeout(id);
+  }, [aviso]);
 
   useEffect(() => {
     if (!menuAbierto) return;
@@ -312,92 +383,145 @@ export function Shell() {
     <div
       className={
         enAuth
-          ? 'relative flex h-dvh flex-col overflow-hidden pt-5 md:pt-8'
-          : 'relative flex min-h-dvh flex-col pb-24 pt-5 md:pb-8 md:pt-8'
+          ? 'relative flex h-dvh flex-col overflow-hidden'
+          : 'relative flex min-h-dvh flex-col pb-16 md:pb-0'
       }
     >
-      <header className="sc-shell flex shrink-0 flex-col gap-4 md:gap-5">
-        <NavLink
-          to="/tienda"
-          className="sc-marca block w-full text-center text-[1.85rem] leading-none md:text-[2.35rem]"
+      <header className="sc-header sticky top-0 z-30">
+        <div
+          className={
+            enAuth
+              ? 'sc-shell flex items-center justify-center py-4'
+              : 'sc-shell relative flex items-center gap-4 py-3.5 md:gap-8 md:py-4'
+          }
         >
-          ShopCart
-        </NavLink>
+          <NavLink
+            to={modo === 'operador' ? '/inventario' : '/tienda'}
+            className="sc-marca shrink-0 text-[1.55rem] leading-none md:text-[1.9rem]"
+          >
+            SHOPCART
+          </NavLink>
 
-        {!enAuth && (
-          <div className="relative grid grid-cols-[1fr_auto] items-center gap-3 md:grid-cols-[1fr_auto_1fr]">
-            <div className="hidden md:block" aria-hidden />
-            <div className="hidden justify-center md:flex">
-              <BarraSecciones es={es} autenticado={!!usuario} />
-            </div>
-            <div className="col-start-2 flex items-center justify-end gap-2 md:col-start-3">
-              {usuario ? (
-                <>
-                  <button
-                    ref={botonUsuarioRef}
-                    type="button"
-                    aria-label="Cuenta"
-                    aria-expanded={menuAbierto}
-                    title="Cuenta"
-                    onClick={() => setMenuAbierto((v) => !v)}
-                    className={`sc-round-btn ${menuAbierto ? 'sc-round-btn-activo' : ''}`}
-                  >
-                    {cargando ? <span className="text-xs">…</span> : <IconoUsuario />}
-                  </button>
+          {!enAuth && (
+            <>
+              <BarraSecciones
+                es={es}
+                autenticado={!!usuario}
+                modo={modo}
+                className="hidden min-w-0 flex-1 md:flex"
+              />
 
-                  {menuAbierto && (
-                    <div
-                      ref={menuRef}
-                      role="menu"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onTouchStart={(e) => e.stopPropagation()}
-                      className="sc-menu-flotante sc-menu-entrar sc-flotante absolute right-12 top-[calc(100%+0.55rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-[1.25rem] p-1.5"
+              <div className="ml-auto flex items-center gap-2 md:gap-3">
+                {puedeCambiar && (
+                  <InterruptorVerComo modo={modo} onCambiar={setModo} es={es} />
+                )}
+
+                {usuario ? (
+                  <>
+                    <button
+                      ref={botonUsuarioRef}
+                      type="button"
+                      aria-label="Cuenta"
+                      aria-expanded={menuAbierto}
+                      title="Cuenta"
+                      onClick={() => setMenuAbierto((v) => !v)}
+                      className={`sc-round-btn ${menuAbierto ? 'sc-round-btn-activo' : ''}`}
                     >
-                      <Link
-                        role="menuitem"
-                        to="/cuenta"
-                        onClick={() => setMenuAbierto(false)}
-                        className="block truncate rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-slate-900/5"
-                      >
-                        {usuario.Correo}
-                      </Link>
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuAbierto(false);
-                          void (async () => {
-                            await salir();
-                            navigate('/tienda');
-                          })();
-                        }}
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                      >
-                        <IconoSalir />
-                        Cerrar sesión
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <NavIcono to="/" label="Entrar">
-                  <IconoUsuario />
-                </NavIcono>
-              )}
+                      {cargando ? <span className="text-xs">…</span> : <IconoUsuario />}
+                    </button>
 
-              <NavIcono to="/carrito" label="Carrito" badge={piezas}>
-                <IconoCarrito />
-              </NavIcono>
-            </div>
-          </div>
-        )}
+                    {menuAbierto && (
+                      <div
+                        ref={menuRef}
+                        role="menu"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        className="sc-menu-flotante sc-menu-entrar sc-flotante absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(16rem,calc(100vw-2rem))] overflow-hidden rounded-xl p-1.5"
+                      >
+                        <Link
+                          role="menuitem"
+                          to="/cuenta"
+                          onClick={() => setMenuAbierto(false)}
+                          className="block truncate rounded-lg px-3 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                        >
+                          {usuario.Correo}
+                        </Link>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuAbierto(false);
+                            void (async () => {
+                              await salir();
+                              navigate('/tienda', {
+                                state: { aviso: 'Sesión cerrada correctamente' },
+                              });
+                            })();
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        >
+                          <IconoSalir />
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <NavLink
+                    to="/"
+                    aria-label="Entrar"
+                    title="Entrar"
+                    className={({ isActive }) =>
+                      `sc-round-btn ${isActive ? 'sc-round-btn-activo' : ''}`
+                    }
+                  >
+                    <IconoUsuario />
+                  </NavLink>
+                )}
+
+                {verCarrito && (
+                  <NavLink
+                    to="/carrito"
+                    aria-label="Carrito"
+                    title="Carrito"
+                    className={({ isActive }) =>
+                      `sc-round-btn relative ${isActive ? 'sc-round-btn-activo' : ''}`
+                    }
+                  >
+                    <IconoCarrito />
+                    {piezas > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-slate-900 px-1 text-[10px] font-semibold leading-4 text-white">
+                        {piezas > 99 ? '99+' : piezas}
+                      </span>
+                    )}
+                  </NavLink>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </header>
+
+      {!usuario && !cargando && !enAuth && (
+        <div className="sc-banner-invitado" role="status">
+          <p className="sc-banner-invitado-texto">
+            <Link to="/" className="sc-banner-invitado-enlace">
+              Loguéate
+            </Link>
+            {' o '}
+            <Link to="/registro" className="sc-banner-invitado-enlace">
+              crea una cuenta
+            </Link>
+            {' para guardar tus pedidos'}
+          </p>
+        </div>
+      )}
 
       <main
         className={
           enAuth
             ? 'sc-shell flex min-h-0 flex-1 flex-col justify-center overflow-hidden py-4'
-            : 'sc-shell mt-8 flex-1 md:mt-10'
+            : 'sc-shell mt-6 flex-1 md:mt-8'
         }
       >
         <Outlet />
@@ -405,10 +529,23 @@ export function Shell() {
 
       {!enAuth && <EstadoPie />}
       {!enAuth && <Desplazamiento />}
+      {aviso && (
+        <div className="sc-toast" role="status" aria-live="polite">
+          {aviso}
+        </div>
+      )}
 
       {!enAuth && (
-        <nav className="sc-shell fixed inset-x-0 bottom-4 z-20 flex justify-center md:hidden">
-          <BarraSecciones es={es} autenticado={!!usuario} />
+        <nav className="sc-header fixed inset-x-0 bottom-0 z-20 border-t md:hidden">
+          <div className="sc-shell overflow-x-auto py-2.5">
+            <BarraSecciones
+              es={es}
+              autenticado={!!usuario}
+              modo={modo}
+              abrirArriba
+              className="flex-nowrap whitespace-nowrap"
+            />
+          </div>
         </nav>
       )}
     </div>

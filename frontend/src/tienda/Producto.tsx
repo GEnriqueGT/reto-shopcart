@@ -5,9 +5,32 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { agregarItem, claveCarrito } from '../carrito/api';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
-import { Panel } from '../compartido/ui/Panel';
 import { consultarProducto } from './api';
 import { quetzales } from './dinero';
+import type { VariantePublica } from './tipos';
+
+function etiquetaVariante(variante: VariantePublica): string {
+  if (!variante.atributos.length) return variante.Sku;
+  return variante.atributos.map((a) => `${a.Nombre}: ${a.Valor}`).join(' · ');
+}
+
+function PlaceholderImagen() {
+  return (
+    <div className="grid h-full w-full place-items-center bg-[#f3f3f3]">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="text-slate-300" aria-hidden>
+        <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="9" cy="10" r="1.5" fill="currentColor" />
+        <path
+          d="M5.5 16.5 9.2 12.8a1.2 1.2 0 0 1 1.7 0l2.1 2.1 1.4-1.4a1.2 1.2 0 0 1 1.7 0L18.5 16.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
 
 export function Producto() {
   const { idProducto } = useParams();
@@ -83,118 +106,83 @@ export function Producto() {
           vacio={false}
         >
           {consulta.data && (
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-              <Panel strong className="overflow-hidden rounded-[1.75rem] p-0">
+            <div className="grid items-stretch gap-x-6 gap-y-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+              <div className="sc-detalle-foto lg:row-start-1">
                 {imagenes[0] ? (
                   <img
                     src={imagenes[0].Url}
                     alt={consulta.data.Nombre}
-                    className="aspect-[4/3] w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-gradient-to-br from-slate-100/90 via-white/70 to-slate-200/80">
-                    <div
-                      className="absolute inset-0 opacity-40"
-                      style={{
-                        backgroundImage:
-                          'radial-gradient(circle at 30% 20%, rgb(186 220 255 / 0.55), transparent 45%), radial-gradient(circle at 80% 80%, rgb(226 232 240 / 0.8), transparent 40%)',
-                      }}
-                    />
-                    <p className="relative sc-muted text-sm">Sin imagen</p>
+                  <div className="absolute inset-0">
+                    <PlaceholderImagen />
                   </div>
                 )}
-                {imagenes.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto p-3">
-                    {imagenes.map((img) => (
-                      <img
-                        key={img.IDImagenProducto}
-                        src={img.Url}
-                        alt=""
-                        className="h-16 w-20 shrink-0 rounded-xl object-cover"
-                      />
-                    ))}
-                  </div>
-                )}
-              </Panel>
+              </div>
 
-              <div>
+              <div className="flex min-h-0 flex-col lg:row-start-1">
                 <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">
                   {consulta.data.Categoria}
                 </p>
-                <h1 className="sc-display mt-2 text-3xl text-slate-900 md:text-4xl">
+                {variante && (
+                  <p className="sc-muted mt-1 text-xs font-medium uppercase tracking-[0.18em]">
+                    SKU {variante.Sku}
+                  </p>
+                )}
+                <h1 className="sc-display mt-2 text-4xl text-slate-900 md:text-5xl">
                   {consulta.data.Nombre}
                 </h1>
+
                 {consulta.data.Descripcion && (
-                  <p className="sc-muted mt-3 text-sm leading-relaxed">{consulta.data.Descripcion}</p>
+                  <p className="sc-muted mt-3 text-xs font-medium uppercase tracking-[0.18em]">
+                    {consulta.data.Descripcion}
+                  </p>
                 )}
 
-                <Panel className="mt-6 rounded-[1.5rem]">
-                  <p className="text-sm font-medium text-slate-900">Variante</p>
-                  <ul className="mt-3 grid gap-2">
-                    {variantes.map((v) => {
-                      const activa = variante?.IDVariante === v.IDVariante;
-                      return (
-                        <li key={v.IDVariante}>
-                          <button
-                            type="button"
-                            onClick={() => setIdVariante(v.IDVariante)}
-                            className={`sc-chip ${activa ? 'sc-chip-activo' : ''}`}
-                          >
-                            <span>
-                              <span className="block text-sm font-semibold text-slate-900">{v.Sku}</span>
-                              {v.atributos.length > 0 && (
-                                <span className="sc-muted mt-1 block text-xs">
-                                  {v.atributos.map((a) => `${a.Nombre}: ${a.Valor}`).join(' · ')}
-                                </span>
-                              )}
-                            </span>
-                            <span className="shrink-0 text-right text-sm">
-                              <span className="block font-semibold">{quetzales(v.Precio)}</span>
-                              <span
-                                className={`block text-xs ${v.Existencia > 0 ? 'text-[var(--sc-ok)]' : 'sc-muted'}`}
-                              >
-                                {v.Existencia > 0 ? `${v.Existencia} en stock` : 'Agotado'}
-                              </span>
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                {variante && maxCantidad > 0 && (
+                  <div className="sc-qty mt-3 self-start">
+                    <button
+                      type="button"
+                      aria-label="Menos"
+                      disabled={cantidad <= 1 || mutAgregar.isPending}
+                      onClick={() => setCantidad((n) => Math.max(1, n - 1))}
+                    >
+                      −
+                    </button>
+                    <span>{cantidad}</span>
+                    <button
+                      type="button"
+                      aria-label="Más"
+                      disabled={cantidad >= maxCantidad || mutAgregar.isPending}
+                      onClick={() => setCantidad((n) => Math.min(maxCantidad, n + 1))}
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
 
-                  {variante && (
-                    <div className="mt-5 border-t border-slate-900/5 pt-4">
-                      <p className="sc-display text-2xl text-slate-900">{quetzales(variante.Precio)}</p>
-                      <p className="sc-muted mt-1 text-sm">SKU {variante.Sku}</p>
-
-                      {maxCantidad > 0 && (
-                        <div className="mt-4 flex items-center gap-2">
-                          <button
-                            type="button"
-                            aria-label="Menos"
-                            disabled={cantidad <= 1 || mutAgregar.isPending}
-                            onClick={() => setCantidad((n) => Math.max(1, n - 1))}
-                            className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
-                          >
-                            −
-                          </button>
-                          <span className="min-w-8 text-center text-sm font-semibold tabular-nums">
-                            {cantidad}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label="Más"
-                            disabled={cantidad >= maxCantidad || mutAgregar.isPending}
-                            onClick={() => setCantidad((n) => Math.min(maxCantidad, n + 1))}
-                            className="sc-round-btn disabled:pointer-events-none disabled:opacity-40"
-                          >
-                            +
-                          </button>
-                        </div>
+                {variante && (
+                  <>
+                    <div className="mt-6">
+                      {variante.atributos.length > 0 && (
+                        <p className="text-sm font-semibold text-slate-900">
+                          {variante.atributos.map((a) => `${a.Nombre}: ${a.Valor}`).join(' · ')}
+                        </p>
                       )}
+                      <p className="sc-display mt-2 text-2xl text-slate-900">
+                        {quetzales(variante.Precio)}
+                      </p>
+                      <p className="sc-muted mt-1 text-sm">
+                        {variante.Existencia > 0
+                          ? `stock: ${variante.Existencia}`
+                          : 'stock: 0'}
+                      </p>
+                    </div>
 
+                    <div className="mt-auto flex flex-col gap-3 pt-6">
                       <Button
-                        className="mt-4"
+                        className="sc-btn-cuadro"
                         fullWidth
                         isDisabled={!puedeAgregar}
                         isPending={mutAgregar.isPending}
@@ -205,10 +193,34 @@ export function Producto() {
                       >
                         Agregar al carrito
                       </Button>
-                      {errorAgregar && <p className="mt-3 text-sm text-red-600">{errorAgregar}</p>}
+                      {errorAgregar && <p className="text-sm text-red-600">{errorAgregar}</p>}
                     </div>
-                  )}
-                </Panel>
+                  </>
+                )}
+              </div>
+
+              <div
+                className="flex flex-wrap gap-3 lg:col-start-1 lg:row-start-2"
+                role="listbox"
+                aria-label="Variantes"
+              >
+                {variantes.map((v) => {
+                  const activa = variante?.IDVariante === v.IDVariante;
+                  return (
+                    <button
+                      key={v.IDVariante}
+                      type="button"
+                      role="option"
+                      aria-selected={activa}
+                      onClick={() => setIdVariante(v.IDVariante)}
+                      className={`sc-variante-cuadro ${activa ? 'sc-variante-cuadro-activa' : ''}`}
+                    >
+                      <span className="sc-variante-cuadro-attr">{etiquetaVariante(v)}</span>
+                      <span className="sc-variante-cuadro-precio">{quetzales(v.Precio)}</span>
+                      <span className="sc-variante-cuadro-sku">{v.Sku}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

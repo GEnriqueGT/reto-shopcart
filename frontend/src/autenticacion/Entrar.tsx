@@ -38,8 +38,7 @@ export function Entrar() {
   return (
     <div className="mx-auto w-full max-w-md">
       <Panel className="rounded-[1.75rem]">
-        <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">Cuenta</p>
-        <h1 className="sc-display mt-2 text-3xl text-slate-900">Entrar</h1>
+        <h1 className="sc-display text-center text-3xl text-slate-900">Entrar</h1>
         <p className="sc-muted mt-2 text-sm">Accede con tu correo de ShopCart.</p>
 
         <form className="mt-6 grid gap-4" onSubmit={(e) => void onSubmit(e)}>

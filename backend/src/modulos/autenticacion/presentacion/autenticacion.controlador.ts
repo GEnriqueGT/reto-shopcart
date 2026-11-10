@@ -57,3 +57,16 @@ export const desactivar = envolver(async (req: Request, res: Response) => {
   }
   res.status(204).send();
 });
+
+export const activar = envolver(async (req: Request, res: Response) => {
+  if (!req.usuario) {
+    throw new ErrorAplicacion(401, 'SESION_REQUERIDA', 'Inicia sesión para continuar.');
+  }
+  const params = dtoIdUsuario.parse(req.params);
+  try {
+    await servicio.activar(params.idUsuario);
+  } catch (error) {
+    throw traducirErrorSql(error) ?? error;
+  }
+  res.status(204).send();
+});

@@ -142,6 +142,21 @@ registro.registerPath({
   },
 });
 
+registro.registerPath({
+  method: 'post',
+  path: '/autenticacion/usuarios/{idUsuario}/activar',
+  tags: ['Autenticación'],
+  summary: 'Reactivar un usuario',
+  security: acceso,
+  request: { params: parametroUsuario },
+  responses: {
+    204: { description: 'La cuenta quedó activa' },
+    401: json(error, 'No hay una sesión válida'),
+    403: json(error, 'El rol no alcanza'),
+    404: json(error, 'El usuario no existe'),
+  },
+});
+
 function json(schema: z.ZodType, description: string) {
   return { description, content: { 'application/json': { schema } } };
 }

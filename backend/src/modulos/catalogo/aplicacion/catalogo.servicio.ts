@@ -77,6 +77,10 @@ export function desactivarCategoria(idCategoria: number): Promise<void> {
   return cambiar(() => repositorio.desactivarCategoria(idCategoria));
 }
 
+export function activarCategoria(idCategoria: number): Promise<void> {
+  return cambiar(() => repositorio.activarCategoria(idCategoria));
+}
+
 export function crearProducto(datos: CrearProducto): Promise<Producto> {
   return cambiar(async () =>
     leer(esquemaProducto, await repositorio.crearProducto(datos), 'PRODUCTO_NO_ENCONTRADO', 'El producto no existe.'),

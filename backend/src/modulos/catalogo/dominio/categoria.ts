@@ -6,6 +6,8 @@ export const esquemaCategoria = z
     IDCategoria: z.number().int().positive(),
     Nombre: z.string().min(1).max(80),
     Activo: bit,
+    /** Solo en listado de mantenimiento. */
+    Productos: z.coerce.number().int().nonnegative().optional(),
   })
   .strict();
 

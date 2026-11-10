@@ -38,6 +38,10 @@ export function desactivarCategoria(idCategoria: number) {
   return pedirJson<void>(`/catalogo/categorias/${idCategoria}/desactivar`, { metodo: 'POST' });
 }
 
+export function activarCategoria(idCategoria: number) {
+  return pedirJson<void>(`/catalogo/categorias/${idCategoria}/activar`, { metodo: 'POST' });
+}
+
 export function buscarProductosAdmin(pagina: number, texto?: string) {
   const q = new URLSearchParams({
     pagina: String(pagina),
@@ -115,6 +119,10 @@ export function desactivarCupon(idCupon: number) {
   return pedirJson<void>(`/cupones/${idCupon}/desactivar`, { metodo: 'POST' });
 }
 
+export function activarCupon(idCupon: number) {
+  return pedirJson<void>(`/cupones/${idCupon}/activar`, { metodo: 'POST' });
+}
+
 export function listarUsuarios(pagina: number) {
   const q = new URLSearchParams({ pagina: String(pagina), tamano: '10' });
   return pedirJson<PaginaUsuarios>(`/autenticacion/usuarios?${q}`);
@@ -122,4 +130,8 @@ export function listarUsuarios(pagina: number) {
 
 export function desactivarUsuario(idUsuario: number) {
   return pedirJson<void>(`/autenticacion/usuarios/${idUsuario}/desactivar`, { metodo: 'POST' });
+}
+
+export function activarUsuario(idUsuario: number) {
+  return pedirJson<void>(`/autenticacion/usuarios/${idUsuario}/activar`, { metodo: 'POST' });
 }

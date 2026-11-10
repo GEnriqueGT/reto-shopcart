@@ -25,8 +25,22 @@ describe('dto de bitácora', () => {
       ValorAnterior: 'Pagado',
       ValorNuevo: 'EnPreparacion',
       CreadoEn: '2026-10-30T12:00:00.000Z',
+      Referencia: 'Pedido #8',
+      IDProducto: null,
+      IDCategoria: null,
+      IDVariante: null,
+      IDCupon: null,
+      IDPedido: 8,
+      NombreProducto: null,
+      Descripcion: null,
+      ImagenUrl: null,
+      Sku: null,
+      Precio: null,
+      Cantidad: null,
+      Motivo: null,
     });
     assert.equal(fila.Accion, 'Estado');
     assert.equal(fila.IDUsuario, null);
+    assert.equal(fila.IDPedido, 8);
   });
 });

@@ -11,9 +11,9 @@ export type ProductoResumen = {
   Categoria: string;
   PrecioDesde: string;
   Disponible: boolean;
+  Variantes: number;
   ImagenUrl: string | null;
 };
-
 export type BusquedaCatalogo = {
   productos: ProductoResumen[];
   total: number;

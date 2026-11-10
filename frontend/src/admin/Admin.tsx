@@ -1,59 +1,37 @@
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { PanelCategorias } from './PanelCategorias';
 import { PanelCupones } from './PanelCupones';
-import { PanelProductos } from './PanelProductos';
 import { PanelUsuarios } from './PanelUsuarios';
 
-type Vista = 'categorias' | 'productos' | 'cupones' | 'usuarios';
+type Entidad = 'categorias' | 'cupones' | 'usuarios';
 
-const vistas: { id: Vista; etiqueta: string }[] = [
-  { id: 'categorias', etiqueta: 'Categorías' },
-  { id: 'productos', etiqueta: 'Productos' },
-  { id: 'cupones', etiqueta: 'Cupones' },
-  { id: 'usuarios', etiqueta: 'Usuarios' },
-];
+const titulos: Record<Entidad, string> = {
+  categorias: 'Categorías',
+  cupones: 'Cupones',
+  usuarios: 'Usuarios',
+};
 
-function vistaDesde(params: URLSearchParams): Vista {
-  const raw = params.get('vista');
-  if (raw === 'productos' || raw === 'cupones' || raw === 'usuarios' || raw === 'categorias') {
-    return raw;
-  }
-  return 'categorias';
+function entidadValida(valor: string | undefined): valor is Entidad {
+  return valor === 'categorias' || valor === 'cupones' || valor === 'usuarios';
 }
 
 export function Admin() {
-  const [params, setParams] = useSearchParams();
-  const vista = vistaDesde(params);
+  const { entidad } = useParams();
 
-  function setVista(siguiente: Vista) {
-    const n = new URLSearchParams();
-    if (siguiente !== 'categorias') n.set('vista', siguiente);
-    setParams(n, { replace: true });
+  if (!entidad) {
+    return <Navigate to="/admin/categorias" replace />;
+  }
+  if (!entidadValida(entidad)) {
+    return <Navigate to="/admin/categorias" replace />;
   }
 
   return (
     <div className="pb-4">
-      <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">Administración</p>
-      <h1 className="sc-display mt-2 text-3xl text-slate-900 md:text-4xl">Admin</h1>
-
-      <div className="sc-mini-tabs mt-5 max-w-full overflow-x-auto">
-        {vistas.map((v) => (
-          <button
-            key={v.id}
-            type="button"
-            className={`sc-mini-tab shrink-0 ${vista === v.id ? 'sc-mini-tab-activo' : ''}`}
-            onClick={() => setVista(v.id)}
-          >
-            {v.etiqueta}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-6">
-        {vista === 'categorias' && <PanelCategorias />}
-        {vista === 'productos' && <PanelProductos />}
-        {vista === 'cupones' && <PanelCupones />}
-        {vista === 'usuarios' && <PanelUsuarios />}
+      <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">{titulos[entidad]}</h1>
+      <div className="mt-8">
+        {entidad === 'categorias' && <PanelCategorias />}
+        {entidad === 'cupones' && <PanelCupones />}
+        {entidad === 'usuarios' && <PanelUsuarios />}
       </div>
     </div>
   );

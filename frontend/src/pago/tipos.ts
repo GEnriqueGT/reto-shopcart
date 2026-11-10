@@ -3,6 +3,7 @@ export type MetodoEnvio = {
   Nombre: string;
   Costo: string;
   Activo: boolean;
+  RequiereDireccion: boolean;
 };
 
 export type Direccion = {
@@ -27,12 +28,13 @@ export type DetallePedido = {
   Cantidad: number;
   Precio: string;
   Importe: string;
+  ImagenUrl: string | null;
 };
 
 export type Pedido = {
   IDPedido: number;
   IDUsuario: number;
-  IDDireccion: number;
+  IDDireccion: number | null;
   Destinatario: string;
   Linea: string;
   Ciudad: string;

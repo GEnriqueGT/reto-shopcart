@@ -42,6 +42,12 @@ export async function desactivarCategoria(idCategoria: number): Promise<void> {
   ]);
 }
 
+export async function activarCategoria(idCategoria: number): Promise<void> {
+  await ejecutarProcedimiento('SP_Catalogo_ActivarCategoria', [
+    { nombre: 'IDCategoria', tipo: sql.Int(), valor: idCategoria },
+  ]);
+}
+
 export async function crearProducto(datos: CrearProducto): Promise<unknown[]> {
   const resultado = await ejecutarProcedimiento('SP_Catalogo_CrearProducto', [
     { nombre: 'IDCategoria', tipo: sql.Int(), valor: datos.idCategoria },

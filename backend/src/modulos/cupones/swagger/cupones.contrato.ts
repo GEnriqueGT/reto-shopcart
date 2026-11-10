@@ -120,6 +120,20 @@ registro.registerPath({
 
 registro.registerPath({
   method: 'post',
+  path: '/cupones/{idCupon}/activar',
+  tags: tag,
+  summary: 'Reactivar un cupón',
+  security: acceso,
+  request: { params: parametroCupon },
+  responses: {
+    204: { description: 'El cupón quedó activo' },
+    404: json(error, 'El cupón no existe'),
+    ...denegado,
+  },
+});
+
+registro.registerPath({
+  method: 'post',
   path: '/cupones/evaluar',
   tags: tag,
   summary: 'Comprobar si el cupón aplica al monto',

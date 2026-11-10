@@ -24,5 +24,11 @@ export function rutasAutenticacion(): Router {
     exigirRol('Administrador'),
     controlador.desactivar,
   );
+  router.post(
+    '/autenticacion/usuarios/:idUsuario/activar',
+    sesion(),
+    exigirRol('Administrador'),
+    controlador.activar,
+  );
   return router;
 }

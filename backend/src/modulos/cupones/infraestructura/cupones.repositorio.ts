@@ -39,6 +39,10 @@ export async function desactivar(idCupon: number): Promise<void> {
   await ejecutarProcedimiento('SP_Cupones_Desactivar', [{ nombre: 'IDCupon', tipo: sql.Int(), valor: idCupon }]);
 }
 
+export async function activar(idCupon: number): Promise<void> {
+  await ejecutarProcedimiento('SP_Cupones_Activar', [{ nombre: 'IDCupon', tipo: sql.Int(), valor: idCupon }]);
+}
+
 export async function listar(consulta: ListarCupones): Promise<unknown[][]> {
   const resultado = await ejecutarProcedimiento('SP_Cupones_Listar', [
     { nombre: 'Texto', tipo: sql.NVarChar(40), valor: consulta.texto ?? null },

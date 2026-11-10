@@ -13,6 +13,19 @@ export const esquemaBitacora = z
     ValorAnterior: z.string().min(1).max(500).nullable(),
     ValorNuevo: z.string().min(1).max(500).nullable(),
     CreadoEn: z.coerce.date(),
+    Referencia: z.string().min(1).max(200).nullable(),
+    IDProducto: z.number().int().positive().nullable(),
+    IDCategoria: z.number().int().positive().nullable(),
+    IDVariante: z.number().int().positive().nullable(),
+    IDCupon: z.number().int().positive().nullable(),
+    IDPedido: z.number().int().positive().nullable(),
+    NombreProducto: z.string().min(1).max(160).nullable(),
+    Descripcion: z.string().max(2000).nullable(),
+    ImagenUrl: z.string().min(1).max(500).nullable(),
+    Sku: z.string().min(1).max(40).nullable(),
+    Precio: z.string().min(1).max(30).nullable(),
+    Cantidad: z.number().int().nullable(),
+    Motivo: z.string().min(1).max(200).nullable(),
   })
   .strict();
 

@@ -20,6 +20,12 @@ export const actualizar = envolver(async (req: Request, res: Response) => {
   res.status(200).json(await servicio.actualizar(params.idCupon, datos));
 });
 
+export const activar = envolver(async (req: Request, res: Response) => {
+  const params = dtoIdCupon.parse(req.params);
+  await servicio.activar(params.idCupon);
+  res.status(204).send();
+});
+
 export const desactivar = envolver(async (req: Request, res: Response) => {
   const params = dtoIdCupon.parse(req.params);
   await servicio.desactivar(params.idCupon);

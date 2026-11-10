@@ -92,9 +92,13 @@ CREATE OR ALTER PROCEDURE SP_Catalogo_ListarCategorias
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT IDCategoria, Nombre, Activo
-  FROM Categoria
-  ORDER BY Nombre;
+  SELECT
+    c.IDCategoria,
+    c.Nombre,
+    c.Activo,
+    (SELECT COUNT(*) FROM Producto p WHERE p.IDCategoria = c.IDCategoria) AS Productos
+  FROM Categoria c
+  ORDER BY c.Nombre;
 END
 GO
 
@@ -144,6 +148,20 @@ BEGIN
 
   UPDATE Categoria
   SET Activo = 0, ActualizadoEn = SYSUTCDATETIME()
+  WHERE IDCategoria = @IDCategoria;
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_Catalogo_ActivarCategoria
+  @IDCategoria INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF NOT EXISTS (SELECT 1 FROM Categoria WHERE IDCategoria = @IDCategoria)
+    THROW 50404, 'CATEGORIA_NO_ENCONTRADA|La categoría no existe.', 1;
+
+  UPDATE Categoria
+  SET Activo = 1, ActualizadoEn = SYSUTCDATETIME()
   WHERE IDCategoria = @IDCategoria;
 END
 GO
@@ -394,6 +412,7 @@ BEGIN
     c.Nombre AS Categoria,
     MIN(v.Precio) AS PrecioDesde,
     MAX(CASE WHEN v.Existencia > 0 THEN 1 ELSE 0 END) AS Disponible,
+    COUNT(v.IDVariante) AS Variantes,
     p.CreadoEn
   INTO #Coincidente
   FROM Producto p
@@ -414,6 +433,7 @@ BEGIN
     c.Categoria,
     c.PrecioDesde,
     c.Disponible,
+    c.Variantes,
     (
       SELECT TOP (1) i.Url
       FROM ImagenProducto i
@@ -504,6 +524,7 @@ GRANT EXECUTE ON SP_Catalogo_ListarCategorias TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_CrearCategoria TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_ActualizarCategoria TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_DesactivarCategoria TO shopcart_app;
+GRANT EXECUTE ON SP_Catalogo_ActivarCategoria TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_CrearProducto TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_ActualizarProducto TO shopcart_app;
 GRANT EXECUTE ON SP_Catalogo_DesactivarProducto TO shopcart_app;

@@ -31,7 +31,7 @@ const llaveIdempotencia = z
 
 export const dtoIniciarPago = z
   .object({
-    idDireccion: z.number().int().positive(),
+    idDireccion: z.number().int().positive().nullable().optional(),
     idMetodoEnvio: z.number().int().positive(),
     llave: llaveIdempotencia,
   })

@@ -32,6 +32,7 @@ export function rutasCatalogo(): Router {
   router.post('/catalogo/categorias', ...admin, controlador.crearCategoria);
   router.patch('/catalogo/categorias/:idCategoria', ...admin, controlador.actualizarCategoria);
   router.post('/catalogo/categorias/:idCategoria/desactivar', ...admin, controlador.desactivarCategoria);
+  router.post('/catalogo/categorias/:idCategoria/activar', ...admin, controlador.activarCategoria);
 
   router.get('/catalogo/mantenimiento/productos/:idProducto', ...admin, controlador.consultarProductoMantenimiento);
   router.post('/catalogo/productos', ...admin, controlador.crearProducto);

@@ -4,6 +4,7 @@ import { leerEntorno } from '../../../configuracion/entorno.js';
 import { leer } from '../../../compartido/base-de-datos/leer.js';
 import { conCandado } from '../../../compartido/concurrencia/candado.js';
 import { enFila } from '../../../compartido/concurrencia/fila-local.js';
+import { ErrorAplicacion } from '../../../compartido/errores/error-aplicacion.js';
 import { centavos } from '../../carrito/dominio/centavos.js';
 import { consultar as consultarCarrito } from '../../carrito/aplicacion/carrito.servicio.js';
 import { invalidarCatalogo } from '../../catalogo/infraestructura/catalogo.cache.js';
@@ -85,11 +86,22 @@ export async function listarEnvios(): Promise<MetodoEnvio[]> {
 }
 
 export async function iniciar(idUsuario: number, datos: IniciarPago): Promise<ConsultaPedido> {
+  const metodos = await listarEnvios();
+  const metodo = metodos.find((item) => item.IDMetodoEnvio === datos.idMetodoEnvio);
+  if (!metodo) {
+    throw new ErrorAplicacion(404, 'METODO_NO_ENCONTRADO', 'El método de envío no existe.');
+  }
+  if (metodo.RequiereDireccion && (datos.idDireccion == null)) {
+    throw new ErrorAplicacion(400, 'DIRECCION_REQUERIDA', 'Selecciona una dirección de entrega.');
+  }
+  const entrada: IniciarPago = metodo.RequiereDireccion
+    ? datos
+    : { ...datos, idDireccion: null };
   const carrito = await consultarCarrito({ tipo: 'usuario', IDUsuario: idUsuario });
   const minutos = leerEntorno().RESERVA_MINUTOS;
   const consulta = await conVariantes(
     carrito.items.map((item) => item.IDVariante),
-    () => repositorio.iniciar(idUsuario, datos, minutos).then(pedido),
+    () => repositorio.iniciar(idUsuario, entrada, minutos).then(pedido),
   );
   if (consulta.pedido.Estado === 'PendientePago') {
     await programarLiberacion(consulta.pedido.IDPedido, minutos);

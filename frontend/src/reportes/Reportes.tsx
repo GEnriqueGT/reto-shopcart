@@ -1,4 +1,3 @@
-import { Button } from '@heroui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -19,14 +18,14 @@ import {
 import { quetzales } from '../compartido/dinero';
 import { mensajeDeError } from '../compartido/errores';
 import { Estado } from '../compartido/ui/Estado';
-import { Panel } from '../compartido/ui/Panel';
 import { etiquetaEstado } from '../pedidos/estado';
+import { PaginacionPedidos } from '../pedidos/PaginacionPedidos';
 import * as api from './api';
 import { claveReportes } from './api';
 import { aIso, etiquetaPeriodo, formatearCorto } from './fechas';
-import type { ModuloBitacora, PeriodoVentas, RangoFechas } from './tipos';
+import type { PeriodoVentas, RangoFechas } from './tipos';
 
-type Vista = 'ventas' | 'categorias' | 'top' | 'pedidos' | 'carritos' | 'bitacora';
+type Vista = 'ventas' | 'categorias' | 'top' | 'pedidos' | 'carritos';
 
 const vistas: { id: Vista; etiqueta: string }[] = [
   { id: 'ventas', etiqueta: 'Ventas' },
@@ -34,12 +33,16 @@ const vistas: { id: Vista; etiqueta: string }[] = [
   { id: 'top', etiqueta: 'Más vendidos' },
   { id: 'pedidos', etiqueta: 'Pedidos' },
   { id: 'carritos', etiqueta: 'Carritos' },
-  { id: 'bitacora', etiqueta: 'Bitácora' },
 ];
 
-const colores = ['#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#0f172a'];
-const periodos: PeriodoVentas[] = ['Dia', 'Semana', 'Mes'];
-const modulos: (ModuloBitacora | '')[] = ['', 'Catalogo', 'Inventario', 'Cupones', 'Pedidos'];
+const colores = ['#111111', '#374151', '#6b7280', '#9ca3af', '#d1d5db', '#4b5563'];
+const periodos: { id: PeriodoVentas; etiqueta: string }[] = [
+  { id: 'Dia', etiqueta: 'Día' },
+  { id: 'Semana', etiqueta: 'Semana' },
+  { id: 'Mes', etiqueta: 'Mes' },
+];
+
+const panel = 'border border-[var(--sc-line)] p-5';
 
 function vistaDesde(params: URLSearchParams): Vista {
   const raw = params.get('vista');
@@ -65,7 +68,7 @@ function FiltroRango({
       <label className="grid gap-1 text-sm">
         <span className="sc-muted">Desde</span>
         <input
-          className="sc-input !min-h-0 py-2"
+          className="sc-input sc-input-cuadro"
           type="datetime-local"
           value={desdeLocal}
           onChange={(e) => onDesde(e.target.value)}
@@ -74,46 +77,13 @@ function FiltroRango({
       <label className="grid gap-1 text-sm">
         <span className="sc-muted">Hasta</span>
         <input
-          className="sc-input !min-h-0 py-2"
+          className="sc-input sc-input-cuadro"
           type="datetime-local"
           value={hastaLocal}
           onChange={(e) => onHasta(e.target.value)}
         />
       </label>
       {children}
-    </div>
-  );
-}
-
-function Paginacion({
-  pagina,
-  total,
-  onPagina,
-}: {
-  pagina: number;
-  total: number;
-  onPagina: (p: number) => void;
-}) {
-  const totalPaginas = Math.max(1, Math.ceil(total / 10));
-  if (total <= 10) return null;
-  return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-      <p className="sc-muted text-sm">
-        {total} · pág. {pagina}/{totalPaginas}
-      </p>
-      <div className="flex gap-2">
-        <Button size="sm" variant="secondary" isDisabled={pagina <= 1} onPress={() => onPagina(pagina - 1)}>
-          Anterior
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          isDisabled={pagina >= totalPaginas}
-          onPress={() => onPagina(pagina + 1)}
-        >
-          Siguiente
-        </Button>
-      </div>
     </div>
   );
 }
@@ -136,20 +106,18 @@ function PanelVentas({ rango }: { rango: RangoFechas }) {
   );
 
   return (
-    <Panel strong className="rounded-[1.5rem]">
+    <div className={panel}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-slate-900">Ventas por periodo</p>
         <div className="flex flex-wrap gap-2">
           {periodos.map((p) => (
             <button
-              key={p}
+              key={p.id}
               type="button"
-              onClick={() => setPeriodo(p)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-                periodo === p ? 'bg-[#93c5fd] text-[#0b1f3a]' : 'bg-white text-slate-600 shadow-sm'
-              }`}
+              onClick={() => setPeriodo(p.id)}
+              className={periodo === p.id ? 'sc-seg-cuadro sc-seg-cuadro-activo' : 'sc-seg-cuadro'}
             >
-              {p}
+              {p.etiqueta}
             </button>
           ))}
         </div>
@@ -171,13 +139,13 @@ function PanelVentas({ rango }: { rango: RangoFechas }) {
                   nombre === 'monto' ? quetzales(Number(valor).toFixed(2)) : String(valor)
                 }
               />
-              <Line type="monotone" dataKey="monto" name="monto" stroke="#2563eb" strokeWidth={2.5} dot={false} />
+              <Line type="monotone" dataKey="monto" name="monto" stroke="#111111" strokeWidth={2.5} dot={false} />
               <Line type="monotone" dataKey="pedidos" name="pedidos" stroke="#94a3b8" strokeWidth={1.75} />
             </LineChart>
           </ResponsiveContainer>
         </Estado>
       </div>
-    </Panel>
+    </div>
   );
 }
 
@@ -199,7 +167,7 @@ function PanelCategorias({ rango }: { rango: RangoFechas }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Panel strong className="rounded-[1.5rem]">
+      <div className={panel}>
         <p className="text-sm font-medium text-slate-900">Ventas por categoría</p>
         <div className="mt-4 h-72">
           <Estado
@@ -220,8 +188,8 @@ function PanelCategorias({ rango }: { rango: RangoFechas }) {
             </ResponsiveContainer>
           </Estado>
         </div>
-      </Panel>
-      <Panel className="rounded-[1.5rem]">
+      </div>
+      <div className={panel}>
         <p className="text-sm font-medium text-slate-900">Detalle</p>
         <ul className="mt-4 grid gap-3">
           {(consulta.data ?? []).map((f) => (
@@ -233,7 +201,7 @@ function PanelCategorias({ rango }: { rango: RangoFechas }) {
             </li>
           ))}
         </ul>
-      </Panel>
+      </div>
     </div>
   );
 }
@@ -255,7 +223,7 @@ function PanelTop({ rango }: { rango: RangoFechas }) {
   );
 
   return (
-    <Panel strong className="rounded-[1.5rem]">
+    <div className={panel}>
       <p className="text-sm font-medium text-slate-900">Más vendidos</p>
       <div className="mt-4 h-80">
         <Estado
@@ -274,12 +242,12 @@ function PanelTop({ rango }: { rango: RangoFechas }) {
                   nombre === 'monto' ? quetzales(Number(valor).toFixed(2)) : String(valor)
                 }
               />
-              <Bar dataKey="cantidad" name="cantidad" fill="#93c5fd" radius={[0, 8, 8, 0]} />
+              <Bar dataKey="cantidad" name="cantidad" fill="#374151" radius={0} />
             </BarChart>
           </ResponsiveContainer>
         </Estado>
       </div>
-    </Panel>
+    </div>
   );
 }
 
@@ -292,11 +260,11 @@ function PanelPedidos({ rango }: { rango: RangoFechas }) {
   });
 
   return (
-    <Panel strong className="rounded-[1.5rem]">
+    <div className={panel}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-slate-900">Pedidos pagados</p>
         <select
-          className="sc-input !min-h-0 w-auto py-2"
+          className="sc-select-cuadro w-auto"
           value={estado}
           onChange={(e) => {
             setEstado(e.target.value);
@@ -321,7 +289,7 @@ function PanelPedidos({ rango }: { rango: RangoFechas }) {
             {(consulta.data?.pedidos ?? []).map((p) => (
               <li
                 key={p.IDPedido}
-                className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-900/5 pb-3 last:border-0 last:pb-0"
+                className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--sc-line)] pb-3 last:border-0 last:pb-0"
               >
                 <div>
                   <p className="font-medium text-slate-900">
@@ -335,10 +303,15 @@ function PanelPedidos({ rango }: { rango: RangoFechas }) {
               </li>
             ))}
           </ul>
-          <Paginacion pagina={pagina} total={consulta.data?.total ?? 0} onPagina={setPagina} />
+          <PaginacionPedidos
+            pagina={pagina}
+            total={consulta.data?.total ?? 0}
+            tamano={10}
+            onCambiar={setPagina}
+          />
         </Estado>
       </div>
-    </Panel>
+    </div>
   );
 }
 
@@ -350,7 +323,7 @@ function PanelCarritos() {
   });
 
   return (
-    <Panel strong className="rounded-[1.5rem]">
+    <div className={panel}>
       <p className="text-sm font-medium text-slate-900">Carritos abandonados</p>
       <div className="mt-4">
         <Estado
@@ -363,7 +336,7 @@ function PanelCarritos() {
             {(consulta.data?.carritos ?? []).map((c) => (
               <li
                 key={c.IDCarrito}
-                className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-900/5 pb-3 last:border-0 last:pb-0"
+                className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--sc-line)] pb-3 last:border-0 last:pb-0"
               >
                 <div>
                   <p className="font-medium text-slate-900">Carrito #{c.IDCarrito}</p>
@@ -376,69 +349,15 @@ function PanelCarritos() {
               </li>
             ))}
           </ul>
-          <Paginacion pagina={pagina} total={consulta.data?.total ?? 0} onPagina={setPagina} />
+          <PaginacionPedidos
+            pagina={pagina}
+            total={consulta.data?.total ?? 0}
+            tamano={10}
+            onCambiar={setPagina}
+          />
         </Estado>
       </div>
-    </Panel>
-  );
-}
-
-function PanelBitacora({ rango }: { rango: RangoFechas }) {
-  const [pagina, setPagina] = useState(1);
-  const [modulo, setModulo] = useState<ModuloBitacora | ''>('');
-  const consulta = useQuery({
-    queryKey: [...claveReportes, 'bitacora', pagina, rango, modulo],
-    queryFn: () => api.bitacora(pagina, rango, modulo || undefined),
-  });
-
-  return (
-    <Panel strong className="rounded-[1.5rem]">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-medium text-slate-900">Bitácora</p>
-        <select
-          className="sc-input !min-h-0 w-auto py-2"
-          value={modulo}
-          onChange={(e) => {
-            setModulo(e.target.value as ModuloBitacora | '');
-            setPagina(1);
-          }}
-        >
-          {modulos.map((m) => (
-            <option key={m || 'todos'} value={m}>
-              {m || 'Todos los módulos'}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mt-4">
-        <Estado
-          cargando={consulta.isLoading}
-          error={consulta.isError ? mensajeDeError(consulta.error) : null}
-          vacio={!consulta.isLoading && (consulta.data?.entradas.length ?? 0) === 0}
-          vacioTexto="Sin entradas."
-        >
-          <ul className="grid gap-3">
-            {(consulta.data?.entradas ?? []).map((e) => (
-              <li key={e.IDBitacora} className="border-b border-slate-900/5 pb-3 last:border-0 last:pb-0">
-                <p className="font-medium text-slate-900">
-                  {e.Modulo} · {e.Accion} · {e.Entidad} #{e.IDEntidad}
-                </p>
-                <p className="sc-muted mt-0.5 text-xs">
-                  {formatearCorto(e.CreadoEn)}
-                  {e.IDUsuario != null ? ` · usuario ${e.IDUsuario}` : ''}
-                </p>
-                {(e.ValorAnterior || e.ValorNuevo) && (
-                  <p className="sc-muted mt-1 text-xs">
-                    {e.ValorAnterior ?? '—'} → {e.ValorNuevo ?? '—'}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-          <Paginacion pagina={pagina} total={consulta.data?.total ?? 0} onPagina={setPagina} />
-        </Estado>
-      </div>
-    </Panel>
+    </div>
   );
 }
 
@@ -464,20 +383,24 @@ export function Reportes() {
 
   return (
     <div className="pb-4">
-      <p className="sc-muted text-xs font-medium uppercase tracking-[0.18em]">Análisis</p>
-      <h1 className="sc-display mt-2 text-3xl text-slate-900 md:text-4xl">Reportes</h1>
+      <h1 className="sc-display text-center text-3xl text-slate-900 md:text-4xl">Reportes</h1>
 
-      <div className="sc-mini-tabs mt-5 max-w-full overflow-x-auto">
-        {vistas.map((v) => (
-          <button
-            key={v.id}
-            type="button"
-            className={`sc-mini-tab shrink-0 ${vista === v.id ? 'sc-mini-tab-activo' : ''}`}
-            onClick={() => setVista(v.id)}
-          >
-            {v.etiqueta}
-          </button>
-        ))}
+      <div className="sc-tabs-inventario mt-5" role="tablist" aria-label="Vistas de reportes">
+        {vistas.map((v) => {
+          const activa = vista === v.id;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={activa}
+              className={`sc-tab-inventario ${activa ? 'sc-tab-inventario-activa' : ''}`}
+              onClick={() => setVista(v.id)}
+            >
+              {v.etiqueta}
+            </button>
+          );
+        })}
       </div>
 
       {vista !== 'carritos' && (
@@ -489,16 +412,16 @@ export function Reportes() {
             onHasta={setHastaLocal}
           >
             {(desdeLocal || hastaLocal) && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onPress={() => {
+              <button
+                type="button"
+                className="sc-btn-cuadro px-4 py-2 text-sm"
+                onClick={() => {
                   setDesdeLocal('');
                   setHastaLocal('');
                 }}
               >
                 Limpiar fechas
-              </Button>
+              </button>
             )}
           </FiltroRango>
         </div>
@@ -510,7 +433,6 @@ export function Reportes() {
         {vista === 'top' && <PanelTop rango={rango} />}
         {vista === 'pedidos' && <PanelPedidos rango={rango} />}
         {vista === 'carritos' && <PanelCarritos />}
-        {vista === 'bitacora' && <PanelBitacora rango={rango} />}
       </div>
     </div>
   );

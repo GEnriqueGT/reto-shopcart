@@ -65,6 +65,19 @@ export type EntradaBitacora = {
   ValorAnterior: string | null;
   ValorNuevo: string | null;
   CreadoEn: string;
+  Referencia: string | null;
+  IDProducto: number | null;
+  IDCategoria: number | null;
+  IDVariante: number | null;
+  IDCupon: number | null;
+  IDPedido: number | null;
+  NombreProducto: string | null;
+  Descripcion: string | null;
+  ImagenUrl: string | null;
+  Sku: string | null;
+  Precio: string | null;
+  Cantidad: number | null;
+  Motivo: string | null;
 };
 
 export type PaginaBitacora = {

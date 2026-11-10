@@ -19,6 +19,19 @@ const entrada = z
     ValorAnterior: z.string().nullable(),
     ValorNuevo: z.string().nullable(),
     CreadoEn: z.iso.datetime(),
+    Referencia: z.string().nullable(),
+    IDProducto: z.number().int().nullable(),
+    IDCategoria: z.number().int().nullable(),
+    IDVariante: z.number().int().nullable(),
+    IDCupon: z.number().int().nullable(),
+    IDPedido: z.number().int().nullable(),
+    NombreProducto: z.string().nullable(),
+    Descripcion: z.string().nullable(),
+    ImagenUrl: z.string().nullable(),
+    Sku: z.string().nullable(),
+    Precio: z.string().nullable(),
+    Cantidad: z.number().int().nullable(),
+    Motivo: z.string().nullable(),
   })
   .openapi('Bitacora');
 

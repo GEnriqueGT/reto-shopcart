@@ -22,6 +22,7 @@ export type ItemCarrito = {
   Precio: string;
   Importe: string;
   Disponible: number;
+  ImagenUrl: string | null;
 };
 
 export type ConsultaCarrito = {

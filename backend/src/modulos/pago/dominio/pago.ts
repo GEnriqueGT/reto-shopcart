@@ -34,6 +34,7 @@ export const esquemaMetodoEnvio = z
     Nombre: z.string().min(1).max(80),
     Costo: dinero,
     Activo: bit,
+    RequiereDireccion: bit,
   })
   .strict();
 
@@ -57,7 +58,7 @@ export const esquemaPedido = z
   .object({
     IDPedido: z.number().int().positive(),
     IDUsuario: z.number().int().positive(),
-    IDDireccion: z.number().int().positive(),
+    IDDireccion: z.number().int().positive().nullable(),
     Destinatario: z.string().min(1).max(120),
     Linea: z.string().min(1).max(200),
     Ciudad: z.string().min(1).max(80),
@@ -93,6 +94,7 @@ export const esquemaDetallePedido = z
     Cantidad: z.number().int().positive(),
     Precio: dinero,
     Importe: dinero,
+    ImagenUrl: z.string().min(1).max(500).nullable(),
   })
   .strict();
 

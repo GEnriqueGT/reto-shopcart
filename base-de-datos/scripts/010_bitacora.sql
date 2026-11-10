@@ -244,12 +244,59 @@ BEGIN
     THROW 50400, 'MODULO_INVALIDO|El módulo no es válido.', 1;
 
   SELECT
-    IDBitacora, IDUsuario, Modulo, Entidad, IDEntidad, Accion, ValorAnterior, ValorNuevo, CreadoEn
-  FROM Bitacora
-  WHERE (@Modulo IS NULL OR Modulo = @Modulo)
-    AND (@Desde IS NULL OR CreadoEn >= @Desde)
-    AND (@Hasta IS NULL OR CreadoEn <= @Hasta)
-  ORDER BY CreadoEn DESC, IDBitacora DESC
+    b.IDBitacora,
+    b.IDUsuario,
+    b.Modulo,
+    b.Entidad,
+    b.IDEntidad,
+    b.Accion,
+    b.ValorAnterior,
+    b.ValorNuevo,
+    b.CreadoEn,
+    CASE b.Entidad
+      WHEN N'Categoria' THEN c.Nombre
+      WHEN N'Producto' THEN p.Nombre
+      WHEN N'Variante' THEN CONCAT(pv.Nombre, N' · ', v.Sku)
+      WHEN N'Cupon' THEN cup.Codigo
+      WHEN N'Pedido' THEN CONCAT(N'Pedido #', b.IDEntidad)
+      WHEN N'MovimientoInventario' THEN CONCAT(pm.Nombre, N' · ', vm.Sku)
+      ELSE NULL
+    END AS Referencia,
+    CASE
+      WHEN b.Entidad = N'Producto' THEN b.IDEntidad
+      WHEN b.Entidad = N'Variante' THEN v.IDProducto
+      WHEN b.Entidad = N'MovimientoInventario' THEN vm.IDProducto
+      ELSE NULL
+    END AS IDProducto,
+    CASE WHEN b.Entidad = N'Categoria' THEN b.IDEntidad ELSE NULL END AS IDCategoria,
+    CASE
+      WHEN b.Entidad = N'Variante' THEN b.IDEntidad
+      WHEN b.Entidad = N'MovimientoInventario' THEN m.IDVariante
+      ELSE NULL
+    END AS IDVariante,
+    CASE WHEN b.Entidad = N'Cupon' THEN b.IDEntidad ELSE NULL END AS IDCupon,
+    CASE WHEN b.Entidad = N'Pedido' THEN b.IDEntidad ELSE NULL END AS IDPedido
+  FROM Bitacora b
+  LEFT JOIN Categoria c
+    ON b.Entidad = N'Categoria' AND c.IDCategoria = b.IDEntidad
+  LEFT JOIN Producto p
+    ON b.Entidad = N'Producto' AND p.IDProducto = b.IDEntidad
+  LEFT JOIN Variante v
+    ON b.Entidad = N'Variante' AND v.IDVariante = b.IDEntidad
+  LEFT JOIN Producto pv
+    ON pv.IDProducto = v.IDProducto
+  LEFT JOIN Cupon cup
+    ON b.Entidad = N'Cupon' AND cup.IDCupon = b.IDEntidad
+  LEFT JOIN MovimientoInventario m
+    ON b.Entidad = N'MovimientoInventario' AND m.IDMovimientoInventario = b.IDEntidad
+  LEFT JOIN Variante vm
+    ON vm.IDVariante = m.IDVariante
+  LEFT JOIN Producto pm
+    ON pm.IDProducto = vm.IDProducto
+  WHERE (@Modulo IS NULL OR b.Modulo = @Modulo)
+    AND (@Desde IS NULL OR b.CreadoEn >= @Desde)
+    AND (@Hasta IS NULL OR b.CreadoEn <= @Hasta)
+  ORDER BY b.CreadoEn DESC, b.IDBitacora DESC
   OFFSET (@Pagina - 1) * @Tamano ROWS FETCH NEXT @Tamano ROWS ONLY;
 
   SELECT COUNT(*) AS Total

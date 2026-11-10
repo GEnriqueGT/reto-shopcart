@@ -171,6 +171,20 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE SP_Cupones_Activar
+  @IDCupon INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF NOT EXISTS (SELECT 1 FROM Cupon WHERE IDCupon = @IDCupon)
+    THROW 50404, 'CUPON_NO_ENCONTRADO|El cupón no existe.', 1;
+
+  UPDATE Cupon
+  SET Activo = 1, ActualizadoEn = SYSUTCDATETIME()
+  WHERE IDCupon = @IDCupon;
+END
+GO
+
 CREATE OR ALTER PROCEDURE SP_Cupones_Listar
   @Texto NVARCHAR(40) = NULL,
   @Pagina INT = 1,
@@ -346,6 +360,7 @@ GO
 GRANT EXECUTE ON SP_Cupones_Crear TO shopcart_app;
 GRANT EXECUTE ON SP_Cupones_Actualizar TO shopcart_app;
 GRANT EXECUTE ON SP_Cupones_Desactivar TO shopcart_app;
+GRANT EXECUTE ON SP_Cupones_Activar TO shopcart_app;
 GRANT EXECUTE ON SP_Cupones_Listar TO shopcart_app;
 GRANT EXECUTE ON SP_Cupones_Evaluar TO shopcart_app;
 GRANT EXECUTE ON SP_Cupones_Consumir TO shopcart_app;

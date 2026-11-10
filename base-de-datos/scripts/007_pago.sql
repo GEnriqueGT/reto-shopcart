@@ -10,6 +10,7 @@ CREATE TABLE MetodoEnvio (
   Nombre NVARCHAR(80) NOT NULL,
   Costo DECIMAL(18, 2) NOT NULL,
   Activo BIT NOT NULL CONSTRAINT DF_MetodoEnvio_Activo DEFAULT 1,
+  RequiereDireccion BIT NOT NULL CONSTRAINT DF_MetodoEnvio_RequiereDireccion DEFAULT 1,
   CONSTRAINT UQ_MetodoEnvio_Nombre UNIQUE (Nombre),
   CONSTRAINT CK_MetodoEnvio_Nombre CHECK (LEN(Nombre) > 0),
   CONSTRAINT CK_MetodoEnvio_Costo CHECK (Costo >= 0)
@@ -36,7 +37,7 @@ GO
 CREATE TABLE Pedido (
   IDPedido INT IDENTITY(1, 1) NOT NULL CONSTRAINT PK_Pedido PRIMARY KEY,
   IDUsuario INT NOT NULL,
-  IDDireccion INT NOT NULL,
+  IDDireccion INT NULL,
   Destinatario NVARCHAR(120) NOT NULL,
   Linea NVARCHAR(200) NOT NULL,
   Ciudad NVARCHAR(80) NOT NULL,
@@ -116,10 +117,10 @@ CREATE INDEX IX_Reserva_Vencimiento ON Reserva (ExpiraEn) INCLUDE (IDVariante, C
 CREATE INDEX IX_Reserva_Variante ON Reserva (IDVariante, Estado, ExpiraEn) INCLUDE (Cantidad);
 GO
 
-INSERT INTO MetodoEnvio (Nombre, Costo) VALUES
-  (N'Retiro en tienda', 0.00),
-  (N'Envío estándar', 25.00),
-  (N'Envío express', 45.00);
+INSERT INTO MetodoEnvio (Nombre, Costo, RequiereDireccion) VALUES
+  (N'Retiro en tienda', 0.00, 0),
+  (N'Envío estándar', 25.00, 1),
+  (N'Envío express', 45.00, 1);
 GO
 
 CREATE OR ALTER FUNCTION FU_Inventario_Fisica (@IDVariante INT)
@@ -163,10 +164,18 @@ BEGIN
   WHERE IDPedido = @IDPedido;
 
   SELECT
-    IDDetallePedido, IDPedido, IDVariante, IDCategoria, Sku, Nombre, Cantidad, Precio, Importe
-  FROM DetallePedido
-  WHERE IDPedido = @IDPedido
-  ORDER BY IDDetallePedido;
+    d.IDDetallePedido, d.IDPedido, d.IDVariante, d.IDCategoria, d.Sku, d.Nombre,
+    d.Cantidad, d.Precio, d.Importe,
+    (
+      SELECT TOP (1) img.Url
+      FROM ImagenProducto img
+      JOIN Variante v ON v.IDProducto = img.IDProducto
+      WHERE v.IDVariante = d.IDVariante
+      ORDER BY img.Orden, img.IDImagenProducto
+    ) AS ImagenUrl
+  FROM DetallePedido d
+  WHERE d.IDPedido = @IDPedido
+  ORDER BY d.IDDetallePedido;
 END
 GO
 
@@ -316,7 +325,7 @@ CREATE OR ALTER PROCEDURE SP_Pago_ListarEnvios
 AS
 BEGIN
   SET NOCOUNT ON;
-  SELECT IDMetodoEnvio, Nombre, Costo, Activo
+  SELECT IDMetodoEnvio, Nombre, Costo, Activo, RequiereDireccion
   FROM MetodoEnvio
   WHERE Activo = 1
   ORDER BY Costo, Nombre;
@@ -325,7 +334,7 @@ GO
 
 CREATE OR ALTER PROCEDURE SP_Pago_Iniciar
   @IDUsuario INT,
-  @IDDireccion INT,
+  @IDDireccion INT = NULL,
   @IDMetodoEnvio INT,
   @Llave NVARCHAR(64),
   @Minutos INT
@@ -347,9 +356,9 @@ BEGIN
   DECLARE @IDPedido INT, @IDCarrito INT, @IDCupon INT, @CodigoCupon NVARCHAR(40),
           @Alcance NVARCHAR(20), @CategoriaCupon INT, @Base DECIMAL(18, 2),
           @Destinatario NVARCHAR(120), @Linea NVARCHAR(200), @Ciudad NVARCHAR(80), @Referencia NVARCHAR(200),
-          @NombreEnvio NVARCHAR(80), @CostoEnvio DECIMAL(18, 2),
+          @NombreEnvio NVARCHAR(80), @CostoEnvio DECIMAL(18, 2), @RequiereDireccion BIT,
           @Subtotal DECIMAL(18, 2), @Descuento DECIMAL(18, 2), @Iva DECIMAL(18, 2), @Total DECIMAL(18, 2),
-          @ExpiraEn DATETIME2;
+          @ExpiraEn DATETIME2, @Correo NVARCHAR(160);
 
   BEGIN TRY
     BEGIN TRAN;
@@ -375,18 +384,7 @@ BEGIN
       THROW 50409, 'PEDIDO_PENDIENTE|Ya hay un pedido pendiente de pago.', 1;
     END
 
-    SELECT
-      @Destinatario = Destinatario, @Linea = Linea, @Ciudad = Ciudad, @Referencia = Referencia
-    FROM Direccion
-    WHERE IDDireccion = @IDDireccion AND IDUsuario = @IDUsuario AND Activo = 1;
-
-    IF @Destinatario IS NULL
-    BEGIN
-      ROLLBACK;
-      THROW 50404, 'DIRECCION_NO_ENCONTRADA|La dirección no existe.', 1;
-    END
-
-    SELECT @NombreEnvio = Nombre, @CostoEnvio = Costo
+    SELECT @NombreEnvio = Nombre, @CostoEnvio = Costo, @RequiereDireccion = RequiereDireccion
     FROM MetodoEnvio
     WHERE IDMetodoEnvio = @IDMetodoEnvio AND Activo = 1;
 
@@ -394,6 +392,29 @@ BEGIN
     BEGIN
       ROLLBACK;
       THROW 50404, 'METODO_NO_ENCONTRADO|El método de envío no existe.', 1;
+    END
+
+    IF @RequiereDireccion = 1
+    BEGIN
+      SELECT
+        @Destinatario = Destinatario, @Linea = Linea, @Ciudad = Ciudad, @Referencia = Referencia
+      FROM Direccion
+      WHERE IDDireccion = @IDDireccion AND IDUsuario = @IDUsuario AND Activo = 1;
+
+      IF @Destinatario IS NULL
+      BEGIN
+        ROLLBACK;
+        THROW 50404, 'DIRECCION_NO_ENCONTRADA|La dirección no existe.', 1;
+      END
+    END
+    ELSE
+    BEGIN
+      SET @IDDireccion = NULL;
+      SELECT @Correo = Correo FROM Usuario WHERE IDUsuario = @IDUsuario;
+      SET @Destinatario = COALESCE(NULLIF(LTRIM(RTRIM(@Correo)), N''), N'Cliente');
+      SET @Linea = N'Retiro en tienda';
+      SET @Ciudad = N'Tienda';
+      SET @Referencia = NULL;
     END
 
     SELECT @IDCarrito = IDCarrito, @IDCupon = IDCupon
@@ -689,7 +710,13 @@ BEGIN
     CASE
       WHEN dbo.FU_Inventario_Fisica(v.IDVariante) - dbo.FU_Inventario_Apartadas(v.IDVariante) < 0 THEN 0
       ELSE dbo.FU_Inventario_Fisica(v.IDVariante) - dbo.FU_Inventario_Apartadas(v.IDVariante)
-    END AS Disponible
+    END AS Disponible,
+    (
+      SELECT TOP (1) img.Url
+      FROM ImagenProducto img
+      WHERE img.IDProducto = p.IDProducto
+      ORDER BY img.Orden, img.IDImagenProducto
+    ) AS ImagenUrl
   FROM ItemCarrito i
   JOIN Variante v ON v.IDVariante = i.IDVariante
   JOIN Producto p ON p.IDProducto = v.IDProducto

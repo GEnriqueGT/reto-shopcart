@@ -17,6 +17,7 @@ function queryLista(filtros: FiltrosPedidos): string {
   q.set('pagina', String(filtros.pagina));
   q.set('tamano', String(filtros.tamano));
   if (filtros.estado) q.set('estado', filtros.estado);
+  if (filtros.idUsuario) q.set('idUsuario', String(filtros.idUsuario));
   return q.toString();
 }
 
